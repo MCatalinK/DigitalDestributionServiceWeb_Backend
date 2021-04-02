@@ -35,7 +35,7 @@ namespace DigitalDistribution.Controllers
             return Ok(await _userEntityRepository.Update(user));
         }
 
-        [HttpDelete]
+        [HttpDelete("{username}")]
         public async Task<ObjectResult> DeleteUser([FromRoute] string username)
         {
             return Ok(await _userEntityRepository.Delete(username));

@@ -43,7 +43,6 @@ namespace DigitalDistribution.Repositories
                 return true;
             }
             return false;
-
         }
 
         public async Task<UserEntity> Update(UserEntity user)
