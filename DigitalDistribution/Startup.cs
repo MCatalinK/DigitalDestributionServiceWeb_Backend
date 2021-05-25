@@ -1,20 +1,20 @@
 using DigitalDistribution.Models.Database;
+using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Repositories;
 using DigitalDistribution.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace DigitalDistribution
 {
@@ -30,14 +30,60 @@ namespace DigitalDistribution
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+
+            #region identity & authorization
+
+            services.AddIdentity<UserEntity, RoleEntity>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+
+                options.Password.RequiredLength = 7;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireDigit = true;
+
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3d);
+                options.Lockout.MaxFailedAccessAttempts = 3;
+            })
+                .AddEntityFrameworkStores<DigitalDistributionDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthorization()
+                .AddAuthentication(o =>
+                {
+                    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(o =>
+                {
+                    o.RequireHttpsMetadata = false;
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = "https://digitalds.ro",
+                        ValidAudience = "https://digitalds.ro",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                            @"asdilasjdlnsac213kmopfa-2asda@")),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+            #endregion
 
             services.AddDbContext<DigitalDistributionDbContext>(o => o.UseSqlServer(
                Configuration.GetConnectionString("DigitalServiceDb")));
 
-            services.AddScoped<UserEntityRepository>();
-            services.AddScoped<UserEntityService>();
+            services.AddScoped<UserRepository>();
+            services.AddScoped<UserService>();
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(x =>
+                x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+
+
+            //services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DigitalDistribution", Version = "v1" });
@@ -58,7 +104,9 @@ namespace DigitalDistribution
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {

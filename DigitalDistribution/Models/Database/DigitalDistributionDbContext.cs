@@ -1,23 +1,146 @@
 ﻿using DigitalDistribution.Models.Database.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DigitalDistribution.Models.Database
 {
-    public class DigitalDistributionDbContext : DbContext
+    public class DigitalDistributionDbContext : IdentityDbContext<UserEntity, RoleEntity, int, IdentityUserClaim<int>, UserRoleEntity,
+        IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
+
     {
         public DigitalDistributionDbContext(DbContextOptions<DigitalDistributionDbContext> options) : base(options)
         {
         }
-
-        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<BillingAddressEntity> Addresses { get; set; }
+        public DbSet<DeveloperEntity> Developers { get; set; }
+        public DbSet<InvoiceEntity> Invoices { get; set; }
+        public DbSet<ProductEntity> Products { get; set; }
+        public DbSet<ProfileEntity> Profiles { get; set; }
+        public DbSet<UpdateEntity> Updates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            #region 1:1 Relationships
+
+            modelBuilder.Entity<UserEntity>()
+                .HasOne(e => e.Address)
+                .WithOne(e => e.User)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserEntity>()
+                .HasOne(e => e.Profile)
+                .WithOne(e => e.User)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            #endregion
+
+            #region 1:N Relationships
+
+            modelBuilder.Entity<UserEntity>()
+                .HasMany(e => e.Bills)
+                .WithOne(e => e.User)
+                .HasForeignKey(fk => fk.User)
+                .IsRequired(false);
+
+            modelBuilder.Entity<ProductEntity>()
+                .HasMany(e => e.Updates)
+                .WithOne(e => e.Product)
+                .HasForeignKey(fk => fk.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(false);
+
+            modelBuilder.Entity<DeveloperEntity>()
+                .HasMany(e => e.Products)
+                .WithOne(e => e.Developer)
+                .HasForeignKey(fk => fk.Developer)
+                .IsRequired();
+
+            modelBuilder.Entity<DeveloperEntity>()
+                .HasMany(e => e.Users)
+                .WithOne(e => e.Developer)
+                .HasForeignKey(fk => fk.Developer)
+                .IsRequired(false);          
+
+            #endregion
+
+            #region M:N Relationships
+
+            //Roles
+            modelBuilder.Entity<UserEntity>()
+                .HasMany(e => e.UserRoles)
+                .WithOne(e => e.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+
+            modelBuilder.Entity<RoleEntity>()
+                .HasMany(e => e.UserRoles)
+                .WithOne(e => e.Role)
+                .HasForeignKey(ur => ur.RoleId)
+                .IsRequired();           
+
+
+            //Library Items
+            modelBuilder.Entity<UserEntity>()
+                .HasMany(e => e.LibraryItems)
+                .WithOne(e => e.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+
+            modelBuilder.Entity<ProductEntity>()
+                .HasMany(e => e.LibraryItems)
+                .WithOne(e => e.Product)
+                .HasForeignKey(pr => pr.ProductId)
+                .IsRequired();
+
+            //Wishlist Items
+
+            modelBuilder.Entity<UserEntity>()
+                .HasMany(e => e.WishlistItems)
+                .WithOne(e => e.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+
+            modelBuilder.Entity<ProductEntity>()
+                .HasMany(e => e.WishlistsItems)
+                .WithOne(e => e.Product)
+                .HasForeignKey(pr => pr.ProductId)
+                .IsRequired();
+
+            //Reviews
+
+            modelBuilder.Entity<ProfileEntity>()
+                .HasMany(e => e.Reviews)
+                .WithOne(e => e.Profile)
+                .HasForeignKey(fr => fr.ProfileId)
+                .IsRequired();
+
+            modelBuilder.Entity<ProductEntity>()
+                .HasMany(e => e.Reviews)
+                .WithOne(e => e.Product)
+                .HasForeignKey(fk => fk.Product)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //Bills
+
+            modelBuilder.Entity<ProductEntity>()
+                .HasMany(e => e.InvoiceItems)
+                .WithOne(e => e.Product)
+                .HasForeignKey(fk => fk.ProductId)
+                .IsRequired();
+
+            modelBuilder.Entity<InvoiceEntity>()
+                .HasMany(e => e.CheckoutItems)
+                .WithOne(e => e.Invoice)
+                .HasForeignKey(fk => fk.InvoiceId)
+                .IsRequired();
+            #endregion
+
         }
     }
 }
