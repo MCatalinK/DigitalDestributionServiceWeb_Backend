@@ -12,8 +12,9 @@ namespace DigitalDistribution.Models.Database
         public DigitalDistributionDbContext(DbContextOptions<DigitalDistributionDbContext> options) : base(options)
         {
         }
+
         public DbSet<BillingAddressEntity> Addresses { get; set; }
-        public DbSet<DeveloperEntity> Developers { get; set; }
+        public DbSet<DevelopmentTeamEntity> Developers { get; set; }
         public DbSet<InvoiceEntity> Invoices { get; set; }
         public DbSet<ProductEntity> Products { get; set; }
         public DbSet<ProfileEntity> Profiles { get; set; }
@@ -22,6 +23,15 @@ namespace DigitalDistribution.Models.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<CheckoutItemEntity>()
+                .HasKey(p => new { p.InvoiceId, p.ProductId });
+
+            modelBuilder.Entity<LibraryProductEntity>()
+                .HasKey(p => new { p.UserId, p.ProductId });
+
+            modelBuilder.Entity<UpdateEntity>()
+                .HasKey(p => p.ProductId);
 
             #region 1:1 Relationships
 
@@ -44,7 +54,7 @@ namespace DigitalDistribution.Models.Database
             modelBuilder.Entity<UserEntity>()
                 .HasMany(e => e.Bills)
                 .WithOne(e => e.User)
-                .HasForeignKey(fk => fk.User)
+                .HasForeignKey(fk => fk.UserId)
                 .IsRequired(false);
 
             modelBuilder.Entity<ProductEntity>()
@@ -54,16 +64,16 @@ namespace DigitalDistribution.Models.Database
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
 
-            modelBuilder.Entity<DeveloperEntity>()
+            modelBuilder.Entity<DevelopmentTeamEntity>()
                 .HasMany(e => e.Products)
                 .WithOne(e => e.Developer)
-                .HasForeignKey(fk => fk.Developer)
+                .HasForeignKey(fk => fk.DeveloperId)
                 .IsRequired();
 
-            modelBuilder.Entity<DeveloperEntity>()
+            modelBuilder.Entity<DevelopmentTeamEntity>()
                 .HasMany(e => e.Users)
                 .WithOne(e => e.Developer)
-                .HasForeignKey(fk => fk.Developer)
+                .HasForeignKey(fk => fk.DeveloperId)
                 .IsRequired(false);          
 
             #endregion
@@ -97,22 +107,7 @@ namespace DigitalDistribution.Models.Database
                 .HasForeignKey(pr => pr.ProductId)
                 .IsRequired();
 
-            //Wishlist Items
-
-            modelBuilder.Entity<UserEntity>()
-                .HasMany(e => e.WishlistItems)
-                .WithOne(e => e.User)
-                .HasForeignKey(ur => ur.UserId)
-                .IsRequired();
-
-            modelBuilder.Entity<ProductEntity>()
-                .HasMany(e => e.WishlistsItems)
-                .WithOne(e => e.Product)
-                .HasForeignKey(pr => pr.ProductId)
-                .IsRequired();
-
             //Reviews
-
             modelBuilder.Entity<ProfileEntity>()
                 .HasMany(e => e.Reviews)
                 .WithOne(e => e.Profile)
@@ -122,12 +117,11 @@ namespace DigitalDistribution.Models.Database
             modelBuilder.Entity<ProductEntity>()
                 .HasMany(e => e.Reviews)
                 .WithOne(e => e.Product)
-                .HasForeignKey(fk => fk.Product)
+                .HasForeignKey(fk => fk.ProductId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             //Bills
-
             modelBuilder.Entity<ProductEntity>()
                 .HasMany(e => e.InvoiceItems)
                 .WithOne(e => e.Product)

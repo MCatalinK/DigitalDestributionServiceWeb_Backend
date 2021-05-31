@@ -24,7 +24,6 @@ namespace DigitalDistribution.Controllers
             _userService = userService;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<ObjectResult> GetUserDetails()
         {
@@ -56,5 +55,4 @@ namespace DigitalDistribution.Controllers
             return Ok(await _userService.RevokeRefreshToken(refreshTokenRequest.RefreshToken));
         }
     }
-
 }

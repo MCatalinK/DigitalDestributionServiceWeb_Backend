@@ -11,7 +11,7 @@ namespace DigitalDistribution.Models.Database.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        private int UserId { get; set; }
+        public int UserId { get; set; }
         [ForeignKey("UserId")]public UserEntity User { get; set; }
         public float Price { get; set; }
         public DateTime DateCreated { get; set; }

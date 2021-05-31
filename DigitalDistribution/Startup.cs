@@ -1,3 +1,5 @@
+using AutoMapper;
+using DigitalDistribution.Helpers;
 using DigitalDistribution.Models.Database;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Repositories;
@@ -37,13 +39,18 @@ namespace DigitalDistribution
             services.AddIdentity<UserEntity, RoleEntity>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
-                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = false;//true
                 options.SignIn.RequireConfirmedPhoneNumber = false;
 
-                options.Password.RequiredLength = 7;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireDigit = true;
+                //options.Password.RequiredLength = 7;
+                //options.Password.RequireNonAlphanumeric = true;
+                //options.Password.RequireUppercase = true;
+                //options.Password.RequireDigit = true;
+
+                options.Password.RequiredLength = 1;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = false;
 
                 options.Lockout.AllowedForNewUsers = true;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3d);
@@ -76,14 +83,23 @@ namespace DigitalDistribution
             services.AddDbContext<DigitalDistributionDbContext>(o => o.UseSqlServer(
                Configuration.GetConnectionString("DigitalServiceDb")));
 
+            //Repositories
             services.AddScoped<UserRepository>();
+            services.AddScoped<ProfileRepository>();
+
+            //Services
             services.AddScoped<UserService>();
+            services.AddScoped<ProfileService>();
+
+
+            services.AddSingleton(new MapperConfiguration(p => p.AddProfile(new MappingProfile())).CreateMapper());
 
             services.AddControllers().AddNewtonsoftJson(x =>
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
 
             //services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DigitalDistribution", Version = "v1" });

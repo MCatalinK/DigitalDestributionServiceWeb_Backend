@@ -17,11 +17,9 @@ namespace DigitalDistribution.Models.Database.Entities
         public List<InvoiceEntity> Bills { get; set; }
         public List<UserRoleEntity> UserRoles { get; set; }
         public List<LibraryProductEntity> LibraryItems { get; set; }
-        public List<WishlistProductEntity> WishlistItems { get; set; }
-        public int IdProfile { get; set; }
-        [ForeignKey("IdProfile")]public ProfileEntity Profile { get; set; }
-        [NotMapped]
-        public int? IdDeveloper { get; set; }
-        [ForeignKey("IdDeveloper")]public DeveloperEntity Developer { get; set; }
+        public int ProfileId { get; set; }
+        [ForeignKey("ProfileId")]public ProfileEntity Profile { get; set; }
+        public int? DeveloperId { get; set; }
+        [ForeignKey("DeveloperId")]public DevelopmentTeamEntity Developer { get; set; }
     }
 }

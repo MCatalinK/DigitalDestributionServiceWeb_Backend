@@ -4,12 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DigitalDistribution.Models.Database.Entities
 {
-    [Table("developers")]
-    public class DeveloperEntity
+    [Table("DevelopmentTeams")]
+    public class DevelopmentTeamEntity:BaseEntity
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
         public string Name { get; set; }
         public List<ProductEntity> Products { get; set; }
         public List<UserEntity> Users { get; set; }

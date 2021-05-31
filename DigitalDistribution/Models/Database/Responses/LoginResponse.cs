@@ -9,6 +9,5 @@ namespace DigitalDistribution.Models.Database.Responses
         public string Token { get; set; }
         public string RefreshToken { get; set; }
         public UserEntity User { get; set; }
-
     }
 }

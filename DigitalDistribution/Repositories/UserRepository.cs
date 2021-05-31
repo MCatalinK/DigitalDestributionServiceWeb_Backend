@@ -62,6 +62,14 @@ namespace DigitalDistribution.Repositories
 
         public async Task<IdentityResult> AddRoleToUser(UserEntity user, string role)
         {
+            IdentityResult roleResult;
+            bool roleExists = await _roleManager.RoleExistsAsync(role);
+            if (!roleExists)
+                roleResult = await _roleManager.CreateAsync(new RoleEntity()
+                {
+                    Name = role,
+                    NormalizedName = role
+                });
             return await _userManager.AddToRoleAsync(user, role);
         }
 

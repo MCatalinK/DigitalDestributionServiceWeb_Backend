@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DigitalDistribution.Models.Database.Entities
 {
-    [Table ("profiles")]
+    [Table ("Profiles")]
     public class ProfileEntity:BaseEntity
     {
         public string DisplayName { get; set; }

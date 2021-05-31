@@ -21,11 +21,13 @@ namespace DigitalDistribution.Services
     {
 
         private readonly UserRepository _userRepository;
+        private readonly ProfileRepository _profileRepository;
         private readonly string _tokenKey = @"asdilasjdlnsac213kmopfa-2asda@";
 
-        public UserService(UserRepository userRepository)
+        public UserService(UserRepository userRepository,ProfileRepository profileRepository)
         {
             _userRepository = userRepository;
+            _profileRepository = profileRepository;
         }
 
         public IQueryable<UserEntity> Get(Expression<Func<UserEntity, bool>> predicate = null)
@@ -43,22 +45,37 @@ namespace DigitalDistribution.Services
 
         public async Task<IdentityResult> RegisterUser(UserRegisterRequest userRequest, string role)
         {
+
             var user = new UserEntity
             {
                 UserName = userRequest.Username,
                 Email = userRequest.Email,
-                PhoneNumber=userRequest.PhoneNumber
+                PhoneNumber=userRequest.PhoneNumber,  
+            };
+            var profile = new ProfileEntity
+            {
+                DisplayName = userRequest.Username,
+                CreatedBy=user.Id
             };
 
+            var profileResult = await _profileRepository.Create(profile);
+            user.Profile=profileResult;
+
+            
             var result = await _userRepository.Register(user, userRequest.Password);
 
             if (!result.Succeeded)
+            {
+                await _profileRepository.Delete(profileResult);
                 return result;
+            }
 
             var roleResult = await _userRepository.AddRoleToUser(user, role);
 
             if (!roleResult.Succeeded)
+            {
                 return result;
+            }
 
             return result;
         }

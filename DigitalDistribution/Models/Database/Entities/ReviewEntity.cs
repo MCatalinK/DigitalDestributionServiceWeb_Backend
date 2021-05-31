@@ -2,14 +2,15 @@
 
 namespace DigitalDistribution.Models.Database.Entities
 {
-    [Table("reviews")]
+    [Table("Reviews")]
     public class ReviewEntity:BaseEntity
     {
+        public int ProductId { get; set; }
+        public int ProfileId { get; set; }
         public float Rating { get; set; }
         public float Content { get; set; }
-        public int ProductId { get; set; }
+       
         [ForeignKey("ProductId")] public ProductEntity Product { get; set; }
-        public int ProfileId { get; set; }
         [ForeignKey("ProfileId")]public ProfileEntity Profile { get; set; }
     }
 }
