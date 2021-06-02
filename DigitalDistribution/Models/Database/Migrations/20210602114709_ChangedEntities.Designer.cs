@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalDistribution.Models.Database.Migrations
 {
     [DbContext(typeof(DigitalDistributionDbContext))]
-    [Migration("20210528090231_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210602114709_ChangedEntities")]
+    partial class ChangedEntities
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,6 +33,18 @@ namespace DigitalDistribution.Models.Database.Migrations
 
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("StreetAdress")
                         .HasColumnType("nvarchar(max)");
@@ -69,19 +81,31 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.ToTable("CheckoutItemEntity");
                 });
 
-            modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.DeveloperEntity", b =>
+            modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Developers");
+                    b.ToTable("DevelopmentTeams");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.InvoiceEntity", b =>
@@ -91,8 +115,17 @@ namespace DigitalDistribution.Models.Database.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPayed")
                         .HasColumnType("bit");
@@ -135,11 +168,23 @@ namespace DigitalDistribution.Models.Database.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DeveloperId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -147,8 +192,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
-                    b.Property<float>("Rating")
-                        .HasColumnType("real");
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -188,7 +233,13 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<DateTime>("LastOnline")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Profiles");
                 });
@@ -304,7 +355,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<DateTime>("DateModified")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DeveloperId")
+                    b.Property<int?>("DevelopmentTeamEntityId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -340,9 +391,6 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -364,7 +412,7 @@ namespace DigitalDistribution.Models.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeveloperId");
+                    b.HasIndex("DevelopmentTeamEntityId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -373,9 +421,6 @@ namespace DigitalDistribution.Models.Database.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("ProfileId")
-                        .IsUnique();
 
                     b.ToTable("AspNetUsers");
                 });
@@ -540,13 +585,24 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ProductEntity", b =>
                 {
-                    b.HasOne("DigitalDistribution.Models.Database.Entities.DeveloperEntity", "Developer")
+                    b.HasOne("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", "Developer")
                         .WithMany("Products")
                         .HasForeignKey("DeveloperId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Developer");
+                });
+
+            modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ProfileEntity", b =>
+                {
+                    b.HasOne("DigitalDistribution.Models.Database.Entities.UserEntity", "User")
+                        .WithOne("Profile")
+                        .HasForeignKey("DigitalDistribution.Models.Database.Entities.ProfileEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ReviewEntity", b =>
@@ -580,19 +636,9 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.UserEntity", b =>
                 {
-                    b.HasOne("DigitalDistribution.Models.Database.Entities.DeveloperEntity", "Developer")
+                    b.HasOne("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", null)
                         .WithMany("Users")
-                        .HasForeignKey("DeveloperId");
-
-                    b.HasOne("DigitalDistribution.Models.Database.Entities.ProfileEntity", "Profile")
-                        .WithOne("User")
-                        .HasForeignKey("DigitalDistribution.Models.Database.Entities.UserEntity", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Developer");
-
-                    b.Navigation("Profile");
+                        .HasForeignKey("DevelopmentTeamEntityId");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.UserRoleEntity", b =>
@@ -650,7 +696,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.DeveloperEntity", b =>
+            modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", b =>
                 {
                     b.Navigation("Products");
 
@@ -676,8 +722,6 @@ namespace DigitalDistribution.Models.Database.Migrations
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ProfileEntity", b =>
                 {
                     b.Navigation("Reviews");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.RoleEntity", b =>
@@ -692,6 +736,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Navigation("Bills");
 
                     b.Navigation("LibraryItems");
+
+                    b.Navigation("Profile");
 
                     b.Navigation("UserRoles");
                 });

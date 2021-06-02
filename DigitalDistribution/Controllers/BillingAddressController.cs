@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace DigitalDistribution.Controllers
 {
-    [Authorize(Roles ="User,Developer,Admin")]
     [ApiController]
     [Route("api/addresses")]
     public class BillingAddressController : ControllerBase

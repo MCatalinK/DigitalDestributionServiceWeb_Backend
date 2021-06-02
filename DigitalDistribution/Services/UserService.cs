@@ -21,13 +21,12 @@ namespace DigitalDistribution.Services
     {
 
         private readonly UserRepository _userRepository;
-        private readonly ProfileRepository _profileRepository;
+
         private readonly string _tokenKey = @"asdilasjdlnsac213kmopfa-2asda@";
 
-        public UserService(UserRepository userRepository,ProfileRepository profileRepository)
+        public UserService(UserRepository userRepository)
         {
             _userRepository = userRepository;
-            _profileRepository = profileRepository;
         }
 
         public IQueryable<UserEntity> Get(Expression<Func<UserEntity, bool>> predicate = null)
@@ -40,6 +39,8 @@ namespace DigitalDistribution.Services
             return await Get(p => p.Id == userId)
                 .Include(p => p.UserRoles)
                 .ThenInclude(p => p.Role)
+                .Include(p=>p.Profile)
+                .Include(p=>p.Address)
                 .FirstOrDefaultAsync();
         }
 
@@ -49,24 +50,15 @@ namespace DigitalDistribution.Services
             var user = new UserEntity
             {
                 UserName = userRequest.Username,
-                Email = userRequest.Email,
-                PhoneNumber=userRequest.PhoneNumber,  
+                Email = userRequest.Email
             };
-            var profile = new ProfileEntity
-            {
-                DisplayName = userRequest.Username,
-                CreatedBy=user.Id
-            };
-
-            var profileResult = await _profileRepository.Create(profile);
-            user.Profile=profileResult;
-
+            
             
             var result = await _userRepository.Register(user, userRequest.Password);
 
             if (!result.Succeeded)
             {
-                await _profileRepository.Delete(profileResult);
+                
                 return result;
             }
 
@@ -146,7 +138,6 @@ namespace DigitalDistribution.Services
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.MobilePhone,user.PhoneNumber)
             };
 
             claims.AddRange(user.UserRoles.Select(p => p.Role.Name).Select(p => new Claim(ClaimTypes.Role, p)));

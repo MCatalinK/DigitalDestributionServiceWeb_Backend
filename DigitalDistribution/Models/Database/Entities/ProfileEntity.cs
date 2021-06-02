@@ -11,7 +11,8 @@ namespace DigitalDistribution.Models.Database.Entities
         public string Avatar { get; set; } = "DefaultPicture";
         public string Description { get; set; } = "";
         public DateTime LastOnline { get; set; } = DateTime.Now;
-        public UserEntity User { get; set; }
+        public int UserId { get; set; }
+        [ForeignKey("UserId")] public UserEntity User { get; set; }
         public List<ReviewEntity> Reviews { get; set; }
     }
 }

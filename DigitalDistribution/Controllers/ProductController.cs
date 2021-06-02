@@ -45,7 +45,7 @@ namespace DigitalDistribution.Controllers
             return Ok(_mapper.Map<ProductResponse>(result));
         }
 
-        [HttpGet("Price/{upperLimit}{lowerLimit}")]
+        [HttpGet("price/{upperLimit}/{lowerLimit}")]
         public async Task<ObjectResult> GetProductByPrice([FromRoute] float upperLimit,[FromRoute] float lowerLimit = 0)
         {
             var products = await _productService.Get(p => p.Price <= upperLimit && p.Price >= lowerLimit).ToListAsync();
@@ -55,7 +55,7 @@ namespace DigitalDistribution.Controllers
             return Ok(_mapper.Map<ProductResponse>(products));
         }
 
-        [HttpGet("Rating/{minimalLimit}")]
+        [HttpGet("rating/{minimalLimit}")]
         public async Task<ObjectResult> GetProductByRating( [FromRoute] int minimalLimit)
         {
             var products = await _productService.Get(p => p.Rating >= minimalLimit).ToListAsync();
@@ -80,7 +80,7 @@ namespace DigitalDistribution.Controllers
             return Ok(_productService.Delete(result));
         }
 
-        [HttpPut("Update/{productId}")]
+        [HttpPut("update/{productId}")]
         public async Task<ObjectResult>UpdateProduct([FromRoute]int productId,UpdateProductRequest productReq)
         {
             var product = await _productService.Get(p => p.Id == productId).FirstOrDefaultAsync();

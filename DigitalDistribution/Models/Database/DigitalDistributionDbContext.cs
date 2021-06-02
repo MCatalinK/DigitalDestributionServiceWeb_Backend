@@ -70,11 +70,11 @@ namespace DigitalDistribution.Models.Database
                 .HasForeignKey(fk => fk.DeveloperId)
                 .IsRequired();
 
-            modelBuilder.Entity<DevelopmentTeamEntity>()
-                .HasMany(e => e.Users)
-                .WithOne(e => e.Developer)
-                .HasForeignKey(fk => fk.DeveloperId)
-                .IsRequired(false);          
+            //modelBuilder.Entity<DevelopmentTeamEntity>()
+            //    .HasMany(e => e.Users)
+            //    .WithOne(e => e.Developer)
+            //    .HasForeignKey(fk => fk.DeveloperId)
+            //    .IsRequired(false);          
 
             #endregion
 

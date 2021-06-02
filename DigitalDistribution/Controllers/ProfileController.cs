@@ -30,6 +30,20 @@ namespace DigitalDistribution.Controllers
             _profileService = profileService;
             _mapper = mapper;
         }
+        [HttpPost]
+        public async Task<ObjectResult> AddProfile(ProfileEntity profile)
+        {
+            var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
+               .Include(p => p.Profile)
+               .FirstOrDefaultAsync();
+
+            if (normalUser is null)
+                return Ok(null);
+
+            if(normalUser?.Profile is null)
+                return Ok(await _profileService.Create(profile));
+            return Ok(null);
+        }
 
         [HttpGet]
         public async Task<ObjectResult> GetProfiles()
@@ -43,7 +57,7 @@ namespace DigitalDistribution.Controllers
             return Ok(_mapper.Map<ProfileDetailsResponse>(normalUser.Profile));
         }
    
-        [HttpPut("Update")]
+        [HttpPut("update")]
         public async Task<ObjectResult> UpdateProfile([FromBody] UpdateProfileRequest profile)
         {
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())

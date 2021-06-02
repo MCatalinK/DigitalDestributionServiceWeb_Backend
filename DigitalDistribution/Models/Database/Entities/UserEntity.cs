@@ -16,10 +16,7 @@ namespace DigitalDistribution.Models.Database.Entities
         public BillingAddressEntity Address { get; set; }
         public List<InvoiceEntity> Bills { get; set; }
         public List<UserRoleEntity> UserRoles { get; set; }
-        public List<LibraryProductEntity> LibraryItems { get; set; }
-        public int ProfileId { get; set; }
-        [ForeignKey("ProfileId")]public ProfileEntity Profile { get; set; }
-        public int? DeveloperId { get; set; }
-        [ForeignKey("DeveloperId")]public DevelopmentTeamEntity Developer { get; set; }
+        public List<LibraryProductEntity> LibraryItems { get; set; } 
+        public ProfileEntity Profile { get; set; }
     }
 }
