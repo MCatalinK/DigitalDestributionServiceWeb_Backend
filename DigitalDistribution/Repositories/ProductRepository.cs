@@ -12,6 +12,12 @@ namespace DigitalDistribution.Repositories
         public ProductRepository(DigitalDistributionDbContext dbContext) : base(dbContext)
         {
         }
+        public async Task<ProductEntity> Search(int id)
+        {
+            return await Table
+                .Where(p => p.Id==id)
+                .FirstOrDefaultAsync();
+        }
         public async Task<List<ProductEntity>> Search(string text)
         {
             return await Table

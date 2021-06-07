@@ -16,6 +16,11 @@ namespace DigitalDistribution.Services
             _productRepository = productRepository;
         }
 
+        public async Task<ProductEntity> Search(int id)
+        {
+            return await _productRepository.Search(id);
+        }
+
         public async Task<List<ProductEntity>> Search(string text)
         {
             return await _productRepository.Search(text);

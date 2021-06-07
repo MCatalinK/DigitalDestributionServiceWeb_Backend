@@ -3,6 +3,7 @@ using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using DigitalDistribution.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalDistribution.Controllers
 {
@@ -16,7 +17,7 @@ namespace DigitalDistribution.Controllers
         {
             _userService = userService;
         }
-        
+        [Authorize]
         [HttpGet]
         public async Task<ObjectResult> GetUserDetails()
         {

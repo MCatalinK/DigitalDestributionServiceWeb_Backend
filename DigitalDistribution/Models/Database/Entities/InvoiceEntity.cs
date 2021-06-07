@@ -10,9 +10,9 @@ namespace DigitalDistribution.Models.Database.Entities
     {
         public int UserId { get; set; }
         [ForeignKey("UserId")]public UserEntity User { get; set; }
-        public float Price { get; set; }
+        public float Price { get; set; } = 0;
         public List<CheckoutItemEntity> CheckoutItems { get; set; }
-        public bool IsPayed { get; set; }       
+        public bool IsPayed { get; set; } = false; 
         
     }
 }

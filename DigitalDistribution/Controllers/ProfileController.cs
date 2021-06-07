@@ -4,16 +4,14 @@ using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.Profile;
 using DigitalDistribution.Models.Database.Responses.Profile;
 using DigitalDistribution.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Controllers
 {
-
+    [Authorize]
     [ApiController]
     [Route("api/profile")]
     public class ProfileController:ControllerBase
@@ -31,7 +29,7 @@ namespace DigitalDistribution.Controllers
             _mapper = mapper;
         }
         [HttpPost]
-        public async Task<ObjectResult> AddProfile(ProfileEntity profile)
+        public async Task<ObjectResult> AddProfile([FromBody] ProfileEntity profile)
         {
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
                .Include(p => p.Profile)
@@ -40,9 +38,12 @@ namespace DigitalDistribution.Controllers
             if (normalUser is null)
                 return Ok(null);
 
-            if(normalUser?.Profile is null)
+            if (normalUser?.Profile is null)
+            {
+                profile.UserId = normalUser.Id;
                 return Ok(await _profileService.Create(profile));
-            return Ok(null);
+            }
+            return Ok(null);//exception
         }
 
         [HttpGet]

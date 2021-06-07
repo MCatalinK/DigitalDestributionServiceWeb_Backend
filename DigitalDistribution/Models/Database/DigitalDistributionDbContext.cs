@@ -20,18 +20,23 @@ namespace DigitalDistribution.Models.Database
         public DbSet<ProfileEntity> Profiles { get; set; }
         public DbSet<UpdateEntity> Updates { get; set; }
 
+
+        public DbSet<CheckoutItemEntity> InvoiceItems { get; set; }
+        public DbSet<LibraryProductEntity> LibraryItems { get; set; }
+        public DbSet<ReviewEntity> Reviews { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+                
             modelBuilder.Entity<CheckoutItemEntity>()
                 .HasKey(p => new { p.InvoiceId, p.ProductId });
 
             modelBuilder.Entity<LibraryProductEntity>()
                 .HasKey(p => new { p.UserId, p.ProductId });
 
-            modelBuilder.Entity<UpdateEntity>()
-                .HasKey(p => p.ProductId);
 
             #region 1:1 Relationships
 
@@ -66,15 +71,15 @@ namespace DigitalDistribution.Models.Database
 
             modelBuilder.Entity<DevelopmentTeamEntity>()
                 .HasMany(e => e.Products)
-                .WithOne(e => e.Developer)
-                .HasForeignKey(fk => fk.DeveloperId)
+                .WithOne(e => e.DevTeam)
+                .HasForeignKey(fk => fk.DevTeamId)
                 .IsRequired();
 
-            //modelBuilder.Entity<DevelopmentTeamEntity>()
-            //    .HasMany(e => e.Users)
-            //    .WithOne(e => e.Developer)
-            //    .HasForeignKey(fk => fk.DeveloperId)
-            //    .IsRequired(false);          
+            modelBuilder.Entity<DevelopmentTeamEntity>()
+                .HasMany(e => e.Users)
+                .WithOne(e => e.DevTeam)
+                .HasForeignKey(fk => fk.DevTeamId)
+                .IsRequired(false);          
 
             #endregion
 
@@ -132,7 +137,8 @@ namespace DigitalDistribution.Models.Database
                 .HasMany(e => e.CheckoutItems)
                 .WithOne(e => e.Invoice)
                 .HasForeignKey(fk => fk.InvoiceId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
             #endregion
 
         }

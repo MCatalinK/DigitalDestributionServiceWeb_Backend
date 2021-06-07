@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalDistribution.Models.Database.Migrations
 {
     [DbContext(typeof(DigitalDistributionDbContext))]
-    [Migration("20210602114709_ChangedEntities")]
-    partial class ChangedEntities
+    [Migration("20210607093836_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -71,14 +71,14 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<string>("License")
+                    b.Property<string>("Licence")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("InvoiceId", "ProductId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CheckoutItemEntity");
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", b =>
@@ -158,7 +158,7 @@ namespace DigitalDistribution.Models.Database.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("LibraryProductEntity");
+                    b.ToTable("LibraryItems");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ProductEntity", b =>
@@ -171,6 +171,9 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
+                    b.Property<string>("Currency")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
@@ -180,7 +183,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DeveloperId")
+                    b.Property<int>("DevTeamId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -192,12 +195,12 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeveloperId");
+                    b.HasIndex("DevTeamId");
 
                     b.ToTable("Products");
                 });
@@ -251,8 +254,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<float>("Content")
-                        .HasColumnType("real");
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
@@ -272,8 +275,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
 
-                    b.Property<float>("Rating")
-                        .HasColumnType("real");
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -315,22 +318,35 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.UpdateEntity", b =>
                 {
-                    b.Property<int>("ProductId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Version")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Updates");
                 });
@@ -355,7 +371,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<DateTime>("DateModified")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DevelopmentTeamEntityId")
+                    b.Property<int?>("DevTeamId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -412,7 +428,7 @@ namespace DigitalDistribution.Models.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DevelopmentTeamEntityId");
+                    b.HasIndex("DevTeamId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -585,13 +601,13 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ProductEntity", b =>
                 {
-                    b.HasOne("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", "Developer")
+                    b.HasOne("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", "DevTeam")
                         .WithMany("Products")
-                        .HasForeignKey("DeveloperId")
+                        .HasForeignKey("DevTeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Developer");
+                    b.Navigation("DevTeam");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.ProfileEntity", b =>
@@ -636,9 +652,11 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.UserEntity", b =>
                 {
-                    b.HasOne("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", null)
+                    b.HasOne("DigitalDistribution.Models.Database.Entities.DevelopmentTeamEntity", "DevTeam")
                         .WithMany("Users")
-                        .HasForeignKey("DevelopmentTeamEntityId");
+                        .HasForeignKey("DevTeamId");
+
+                    b.Navigation("DevTeam");
                 });
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.UserRoleEntity", b =>

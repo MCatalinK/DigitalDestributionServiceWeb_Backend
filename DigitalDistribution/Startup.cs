@@ -85,12 +85,26 @@ namespace DigitalDistribution
 
             //Repositories
             services.AddScoped<UserRepository>();
+            services.AddScoped<BillingAddressRepository>();
+            services.AddScoped<CheckoutItemRepository>();
+            services.AddScoped<DevelopmentTeamRepository>();
+            services.AddScoped<InvoiceRepository>();
+            services.AddScoped<LibraryRepository>();
+            services.AddScoped<ProductRepository>();
             services.AddScoped<ProfileRepository>();
+            services.AddScoped<UpdateRepository>();
+
 
             //Services
             services.AddScoped<UserService>();
+            services.AddScoped<BillingAddressService>();
+            services.AddScoped<CheckoutItemService>();
+            services.AddScoped<DevelopmentTeamService>();
+            services.AddScoped<InvoiceService>();
+            services.AddScoped<LibraryService>();
+            services.AddScoped<ProductService>();
             services.AddScoped<ProfileService>();
-
+            services.AddScoped<UpdateService>();
 
             services.AddSingleton(new MapperConfiguration(p => p.AddProfile(new MappingProfile())).CreateMapper());
 

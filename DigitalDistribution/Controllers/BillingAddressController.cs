@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace DigitalDistribution.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/addresses")]
     public class BillingAddressController : ControllerBase
@@ -44,7 +45,20 @@ namespace DigitalDistribution.Controllers
         [HttpPost]
         public async Task<ObjectResult> AddBillingAddress([FromBody] BillingAddressEntity address)
         {
-            return Ok(await _billingAddressService.Create(address));
+            var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
+              .Include(p=>p.Address)
+              .FirstOrDefaultAsync();
+
+            if (normalUser is null)
+                return Ok(null);
+
+            if (normalUser?.Profile is null)
+            {
+                address.UserId = normalUser.Id;
+                return Ok(await _billingAddressService.Create(address));
+            }
+            return Ok(null);//exception
+           
         }
 
         [HttpDelete]

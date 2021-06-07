@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DigitalDistribution.Models.Database.Migrations
 {
-    public partial class ChangedEntities : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -72,7 +72,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                     DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpires = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DevelopmentTeamEntityId = table.Column<int>(type: "int", nullable: true),
+                    DevTeamId = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -92,8 +92,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUsers_DevelopmentTeams_DevelopmentTeamEntityId",
-                        column: x => x.DevelopmentTeamEntityId,
+                        name: "FK_AspNetUsers_DevelopmentTeams_DevTeamId",
+                        column: x => x.DevTeamId,
                         principalTable: "DevelopmentTeams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -107,9 +107,10 @@ namespace DigitalDistribution.Models.Database.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<float>(type: "real", nullable: false),
                     Price = table.Column<float>(type: "real", nullable: false),
-                    DeveloperId = table.Column<int>(type: "int", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DevTeamId = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
@@ -119,8 +120,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_DevelopmentTeams_DeveloperId",
-                        column: x => x.DeveloperId,
+                        name: "FK_Products_DevelopmentTeams_DevTeamId",
+                        column: x => x.DevTeamId,
                         principalTable: "DevelopmentTeams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -291,7 +292,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LibraryProductEntity",
+                name: "LibraryItems",
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -300,15 +301,15 @@ namespace DigitalDistribution.Models.Database.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LibraryProductEntity", x => new { x.UserId, x.ProductId });
+                    table.PrimaryKey("PK_LibraryItems", x => new { x.UserId, x.ProductId });
                     table.ForeignKey(
-                        name: "FK_LibraryProductEntity_AspNetUsers_UserId",
+                        name: "FK_LibraryItems_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LibraryProductEntity_Products_ProductId",
+                        name: "FK_LibraryItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -319,15 +320,19 @@ namespace DigitalDistribution.Models.Database.Migrations
                 name: "Updates",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Version = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Updates", x => x.ProductId);
+                    table.PrimaryKey("PK_Updates", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Updates_Products_ProductId",
                         column: x => x.ProductId,
@@ -337,24 +342,24 @@ namespace DigitalDistribution.Models.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CheckoutItemEntity",
+                name: "InvoiceItems",
                 columns: table => new
                 {
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     InvoiceId = table.Column<int>(type: "int", nullable: false),
-                    License = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Licence = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CheckoutItemEntity", x => new { x.InvoiceId, x.ProductId });
+                    table.PrimaryKey("PK_InvoiceItems", x => new { x.InvoiceId, x.ProductId });
                     table.ForeignKey(
-                        name: "FK_CheckoutItemEntity_Invoices_InvoiceId",
+                        name: "FK_InvoiceItems_Invoices_InvoiceId",
                         column: x => x.InvoiceId,
                         principalTable: "Invoices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CheckoutItemEntity_Products_ProductId",
+                        name: "FK_InvoiceItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -367,10 +372,10 @@ namespace DigitalDistribution.Models.Database.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     ProfileId = table.Column<int>(type: "int", nullable: false),
-                    Rating = table.Column<float>(type: "real", nullable: false),
-                    Content = table.Column<float>(type: "real", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
@@ -432,9 +437,9 @@ namespace DigitalDistribution.Models.Database.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_DevelopmentTeamEntityId",
+                name: "IX_AspNetUsers_DevTeamId",
                 table: "AspNetUsers",
-                column: "DevelopmentTeamEntityId");
+                column: "DevTeamId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -444,8 +449,8 @@ namespace DigitalDistribution.Models.Database.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CheckoutItemEntity_ProductId",
-                table: "CheckoutItemEntity",
+                name: "IX_InvoiceItems_ProductId",
+                table: "InvoiceItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
@@ -454,14 +459,14 @@ namespace DigitalDistribution.Models.Database.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryProductEntity_ProductId",
-                table: "LibraryProductEntity",
+                name: "IX_LibraryItems_ProductId",
+                table: "LibraryItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_DeveloperId",
+                name: "IX_Products_DevTeamId",
                 table: "Products",
-                column: "DeveloperId");
+                column: "DevTeamId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Profiles_UserId",
@@ -478,6 +483,11 @@ namespace DigitalDistribution.Models.Database.Migrations
                 name: "IX_Reviews_ProfileId",
                 table: "Reviews",
                 column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Updates_ProductId",
+                table: "Updates",
+                column: "ProductId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -501,10 +511,10 @@ namespace DigitalDistribution.Models.Database.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CheckoutItemEntity");
+                name: "InvoiceItems");
 
             migrationBuilder.DropTable(
-                name: "LibraryProductEntity");
+                name: "LibraryItems");
 
             migrationBuilder.DropTable(
                 name: "Reviews");

@@ -10,10 +10,11 @@ namespace DigitalDistribution.Models.Database.Entities
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public int Rating { get; set; }
+        public float Rating { get; set; }
         public float Price { get; set; }
-        public int DeveloperId { get; set; }
-        [ForeignKey("DeveloperId")] public DevelopmentTeamEntity Developer { get; set; }
+        public string Currency { get; set; }
+        public int DevTeamId { get; set; }
+        [ForeignKey("DevTeamId")] public DevelopmentTeamEntity DevTeam { get; set; }
         public List<UpdateEntity> Updates { get; set; }
         public List<ReviewEntity> Reviews { get; set; }
         public List<LibraryProductEntity> LibraryItems { get; set; }
