@@ -34,7 +34,9 @@ namespace DigitalDistribution.Controllers
         [HttpGet]
         public async Task<ObjectResult> GetAllProfiles()
         {
-            var profiles = await _profileService.Get().ToListAsync();
+            var profiles = await _profileService.Get()
+                .ToListAsync();
+
             return Ok(_mapper.Map<List<ProfileDetailsResponse>>(profiles));
         }
 

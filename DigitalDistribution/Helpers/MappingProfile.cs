@@ -4,6 +4,7 @@ using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.BillingAddress;
 using DigitalDistribution.Models.Database.Requests.DevelopmentTeam;
 using DigitalDistribution.Models.Database.Requests.Invoice;
+using DigitalDistribution.Models.Database.Requests.Product;
 using DigitalDistribution.Models.Database.Requests.Profile;
 using DigitalDistribution.Models.Database.Requests.Review;
 using DigitalDistribution.Models.Database.Requests.Update;
@@ -33,15 +34,22 @@ namespace DigitalDistribution.Helpers
             CreateMap<UpdateInvoiceRequest, InvoiceEntity>()
                 .ForAllMembers(p => p.Condition((q, s, m) => m != null));
 
+            CreateMap<UpdateProductRequest, ProductEntity>()
+                .ForAllMembers(p => p.Condition((q, s, m) => m != null));
             CreateMap<ProductEntity, ProductResponse>();
 
             CreateMap<InvoiceEntity, InvoiceResponse>();
 
-            CreateMap<ReviewEntity, UpdateReviewRequest>();
+            CreateMap<UpdateReviewRequest, ReviewEntity>()
+                .ForAllMembers(p => p.Condition((q, s, m) => m != null));
 
-            CreateMap<UpdateEntity, UpdateRequest>();
+            CreateMap<UpdateRequest, UpdateEntity >()
+                .ForAllMembers(p => p.Condition((q, s, m) => m != null));
 
             CreateMap<ReviewEntity, ReviewResponse>();
+            CreateMap<ReviewEntity, ReviewResponseProduct>();
+            CreateMap<ReviewEntity, ReviewResponseProfile>();
+            
         }
     }
 }

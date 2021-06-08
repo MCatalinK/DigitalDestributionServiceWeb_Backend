@@ -2,10 +2,11 @@
 
 namespace DigitalDistribution.Models.Database.Responses.Review
 {
-    public class ReviewResponse:BaseResponse
+    public class ReviewResponseProduct:BaseResponse
     {
         public int Rating { get; set; }
         public string Content { get; set; }
         public ProductEntity Product { get; set; }
+
     }
 }

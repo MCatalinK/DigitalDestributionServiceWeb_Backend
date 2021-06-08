@@ -59,7 +59,10 @@ namespace DigitalDistribution.Controllers
         [HttpPut("update/{teamId}")]
         public async Task<ObjectResult> UpdateDevelopmentTeam([FromRoute] int teamId, UpdateDevTeamRequest team)
         {
-            var devTeam = await _developmentTeamService.Get(p => p.Id == teamId).FirstOrDefaultAsync();
+            var devTeam = await _developmentTeamService.Get(p => p.Id == teamId)
+                .Include(p=>p.Products)
+                .FirstOrDefaultAsync();
+
             if (devTeam is null)
                 return Ok(null);
 

@@ -1,9 +1,7 @@
-﻿using DigitalDistribution.Helpers;
-using DigitalDistribution.Models.Database;
+﻿using DigitalDistribution.Models.Database;
 using DigitalDistribution.Models.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,6 +38,23 @@ namespace DigitalDistribution.Repositories
         }
         public async Task<CheckoutItemEntity> Create(CheckoutItemEntity item)
         {
+            var user = await _dbContext.Users
+                .Include(p=>p.Bills.Where(p => p.Id == item.InvoiceId))
+                .ThenInclude(p => p.CheckoutItems)
+                .FirstOrDefaultAsync();
+
+                user.Bills.First().CheckoutItems.Add(item);
+
+            var product = await _dbContext.Products
+                .Where(p => p.Id == item.ProductId)
+                .Include(p=>p.InvoiceItems)
+                .FirstOrDefaultAsync();
+
+
+                user.Bills.First().Price += product.Price;
+
+            product.InvoiceItems.Add(item);
+
             EntityEntry<CheckoutItemEntity> result = await _dbContext.InvoiceItems.AddAsync(item);
             await _dbContext.SaveChangesAsync();
             return result.Entity;

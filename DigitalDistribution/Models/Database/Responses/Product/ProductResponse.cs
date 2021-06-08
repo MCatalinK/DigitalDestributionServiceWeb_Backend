@@ -7,10 +7,11 @@ namespace DigitalDistribution.Models.Database.Responses.Product
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public float Rating { get; set; }
+        public float Rating { get; set; } = 0;
         public float Price { get; set; }
         public string Currency { get; set; }
         public DevelopmentTeamEntity DevTeam { get; set; }
+        public List<UpdateEntity> Updates { get; set; }
         public List<ReviewEntity> Reviews { get; set; }
     }
 }

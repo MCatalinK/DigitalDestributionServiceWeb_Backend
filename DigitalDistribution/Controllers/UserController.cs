@@ -28,11 +28,27 @@ namespace DigitalDistribution.Controllers
         [HttpGet("admin/")]
         public async Task<ObjectResult> GetAllUsers()
         {
-            return Ok(await _userService.Get().ToListAsync());
+            return Ok(await _userService.Get()
+                .Include(p=>p.UserRoles)
+                .ToListAsync());
+        }
+        [Authorize]
+        [HttpGet("library")]
+        public async Task<ObjectResult> GetItemsFromLibrary()
+        {
+            var user = await _userService.Get(p => p.Id == User.GetUserId())
+                .Include(p => p.LibraryItems)
+                .ThenInclude(p=>p.Product)
+                .FirstOrDefaultAsync();
+
+            if (user?.LibraryItems is null)
+                return Ok(null);
+
+            return Ok(user.LibraryItems);
         }
 
 
-        [HttpPost("register")]
+        [HttpPost("register/{devTeamId}")]
         public async Task<ObjectResult> Register([FromBody] UserRegisterRequest userRequest,
             [FromQuery] string role,[FromRoute] int? devTeamId)
         {

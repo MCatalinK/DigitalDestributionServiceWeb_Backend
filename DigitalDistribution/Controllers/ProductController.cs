@@ -39,10 +39,15 @@ namespace DigitalDistribution.Controllers
         [HttpGet]
         public async Task<ObjectResult> GetAllProducts()
         {
-            var products = await _productService.Get().ToListAsync();
+            var products = await _productService.Get()
+                .Include(p=>p.DevTeam)
+                .Include(p=>p.Updates)
+                .Include(p=>p.Reviews)
+                .ToListAsync();
+
             if (products is null)
                 return Ok(null);
-
+            
             return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
 
@@ -55,8 +60,8 @@ namespace DigitalDistribution.Controllers
             return Ok(_mapper.Map<List<ProductResponse>>(result));
         }
 
-        [HttpGet("price/{upperLimit}&{lowerLimit}")]
-        public async Task<ObjectResult> GetProductByPrice([FromRoute] float upperLimit,[FromRoute] float lowerLimit = 0)
+        [HttpGet("price/{lowerLimit}&{upperLimit}")]
+        public async Task<ObjectResult> GetProductByPrice([FromRoute] float lowerLimit,[FromRoute] float upperLimit = 0)
         {
             var products = await _productService.GetProductByPrice(upperLimit, lowerLimit);
             if (products is null)
@@ -108,15 +113,16 @@ namespace DigitalDistribution.Controllers
         [HttpPost("updates/{productId}")]
         public async Task<ObjectResult> AddUpdate([FromBody] UpdateEntity update, [FromRoute] int productId)
         {
-            var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
+            var devUser = await _userService.Get(p => p.Id == User.GetUserId())
                .Include(p => p.DevTeam)
                .ThenInclude(p => p.Products.Where(u => u.Id == productId))
+               .ThenInclude(p=>p.Updates)
                .FirstOrDefaultAsync();
 
-            if (normalUser?.DevTeam.Products.FirstOrDefault() is null)
+            if (devUser?.DevTeam.Products.FirstOrDefault() is null)
                 return Ok(null);//exception
 
-            update.ProductId = normalUser.DevTeam.Products.First().Id;
+            update.ProductId = devUser.DevTeam.Products.First().Id;
             return Ok(await _updateService.Create(update)); 
            
         }
@@ -127,18 +133,15 @@ namespace DigitalDistribution.Controllers
         {
             var devUser = await _userService.Get(p => p.Id == User.GetUserId())
                .Include(p => p.DevTeam)
+               .ThenInclude(p=>p.Products)
+               .ThenInclude(p=>p.Updates.Where(u=>u.Id==updateId))
                .FirstOrDefaultAsync();
 
-            var tmpUpdate = await _updateService.Get(p => p.Id == updateId)
-                .Include(p => p.Product.DevTeamId == devUser.DevTeamId)
-                .FirstOrDefaultAsync();
 
-
-
-            if (tmpUpdate?.Product is null)
+            if (devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault() is null)
                 return Ok(null);//exception
 
-            return Ok(await _updateService.Update(_mapper.Map(update, tmpUpdate)));
+            return Ok(await _updateService.Update(_mapper.Map(update, devUser.DevTeam.Products.First().Updates.First())));
         }
     }
 }

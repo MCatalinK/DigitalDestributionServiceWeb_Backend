@@ -12,6 +12,13 @@ namespace DigitalDistribution.Models.Database.Entities
         public int InvoiceId { get; set; }
         public string Licence { get; set; }
         [ForeignKey("ProductId")]public ProductEntity Product { get; set; }
-        [ForeignKey("InvoiceId")]public InvoiceEntity Invoice { get; set; }  
+        [ForeignKey("InvoiceId")]public InvoiceEntity Invoice { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CheckoutItemEntity entity &&
+                   ProductId == entity.ProductId &&
+                   InvoiceId == entity.InvoiceId;
+        }
     }
 }

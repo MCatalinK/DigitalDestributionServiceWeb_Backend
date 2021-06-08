@@ -15,9 +15,6 @@ namespace DigitalDistribution.Services
         {
             _invoiceRepository = invoiceRepository;
         }
-        public async Task<List<InvoiceEntity>> GetBillsByPrice(UserEntity user, float lowerLimit, float upperLimit)
-        {
-            return await _invoiceRepository.GetBillsByPrice(user, lowerLimit, upperLimit);
-        }
+       
     }
 }

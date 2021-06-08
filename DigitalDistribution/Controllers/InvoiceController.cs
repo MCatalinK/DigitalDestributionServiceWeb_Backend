@@ -56,12 +56,18 @@ namespace DigitalDistribution.Controllers
         }
 
         [HttpGet("{lowerLimit}&{upperLimit}")]
-        public async Task<ObjectResult> GetInvoicesByPrice([FromQuery] float minimalLimit = 0,[FromQuery] float maxLimit = 0)
+        public async Task<ObjectResult> GetInvoicesByPrice([FromRoute] float lowerLimit = 0,[FromRoute] float upperLimit = 0)
         {
             var user = await _userService.Get(p => p.Id == User.GetUserId())
+                .Include(p=>p.Bills.Where(u=>u.Price>=lowerLimit && u.Price<=upperLimit && u.IsPayed==true))
+                .ThenInclude(p=>p.CheckoutItems)
+                .ThenInclude(p=>p.Product)
                 .FirstOrDefaultAsync();
-            var bills = await _invoiceService.GetBillsByPrice(user, minimalLimit, maxLimit);
-            return Ok(_mapper.Map<List<InvoiceResponse>>(bills));
+
+            if (user?.Bills.FirstOrDefault() is null)
+                return Ok(null);
+
+            return Ok(_mapper.Map<List<InvoiceResponse>>(user.Bills));
         }
 
         [HttpGet("{invoiceId}")]
@@ -69,6 +75,8 @@ namespace DigitalDistribution.Controllers
         {
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
                  .Include(u => u.Bills.Where(p => p.Id == invoiceId && p.IsPayed == true))
+                 .ThenInclude(p=>p.CheckoutItems)
+                 .ThenInclude(p => p.Product)
                  .FirstOrDefaultAsync();
 
             if (normalUser?.Bills.FirstOrDefault() is null)
@@ -82,6 +90,7 @@ namespace DigitalDistribution.Controllers
         {
             var user = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(p => p.Bills.Where(p => p.IsPayed == false))
+                .ThenInclude(p=>p.CheckoutItems)
                 .FirstOrDefaultAsync();
             if (user?.Bills.FirstOrDefault() is null)
             {
@@ -91,24 +100,46 @@ namespace DigitalDistribution.Controllers
             else
                 return Ok(null);//error
         }
+        [HttpDelete]
+        public async Task<ObjectResult> DeleteCurrentInvoice()
+        {
+            var user = await _userService.Get(p => p.Id == User.GetUserId())
+               .Include(p => p.Bills.Where(p => p.IsPayed == false))
+               .ThenInclude(p => p.CheckoutItems)
+               .FirstOrDefaultAsync();
+            if (user?.Bills.FirstOrDefault() is null)
+            {
+                return Ok(null);
+            }
+            return Ok(await _invoiceService.Delete(user.Bills.First()));
+        }
 
         [HttpPost("add/{productId}")]
         public async Task<ObjectResult> AddNewProduct([FromBody] CheckoutItemEntity itemEntity,[FromRoute] int productId)
         {
             var user = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(p => p.Bills.Where(p => p.IsPayed == false))
+                .ThenInclude(p => p.CheckoutItems)
                 .Include(p=>p.LibraryItems.Where(u=>u.ProductId==productId))
                 .FirstOrDefaultAsync();
 
             var product = await _productService.Get(p => p.Id == productId)
+                .Include(p => p.InvoiceItems)
                 .FirstOrDefaultAsync();
 
             if (user?.Bills.FirstOrDefault() is null)
                 return Ok(null);
             if (user.LibraryItems.FirstOrDefault() != null)
                 return Ok(null);
+            
+
 
             itemEntity.Licence = HelperExtensionMethods.CreateLicence();
+            itemEntity.ProductId = product.Id;
+            itemEntity.InvoiceId = user.Bills.First().Id;
+
+            if (user.Bills.FirstOrDefault().CheckoutItems.Contains(itemEntity))
+                return Ok(null);
             
             return Ok(await _itemService.AddItem(itemEntity));
         }
@@ -118,6 +149,7 @@ namespace DigitalDistribution.Controllers
         {
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(u => u.Bills.Where(p => p.IsPayed == false))
+                .ThenInclude(p => p.CheckoutItems)
                 .FirstOrDefaultAsync();
 
             var product = await _productService.Get(p => p.Id == productId)
@@ -138,6 +170,7 @@ namespace DigitalDistribution.Controllers
         {
             var user = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(p => p.Bills.Where(u => u.IsPayed == false))
+                .ThenInclude(p => p.CheckoutItems)
                 .Include(p => p.LibraryItems)
                 .FirstOrDefaultAsync();
 
