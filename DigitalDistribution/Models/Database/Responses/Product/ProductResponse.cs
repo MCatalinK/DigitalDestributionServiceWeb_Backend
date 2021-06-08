@@ -1,8 +1,5 @@
 ﻿using DigitalDistribution.Models.Database.Entities;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DigitalDistribution.Models.Database.Responses.Product
 {
@@ -10,8 +7,10 @@ namespace DigitalDistribution.Models.Database.Responses.Product
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public int Rating { get; set; }
+        public float Rating { get; set; }
         public float Price { get; set; }
+        public string Currency { get; set; }
+        public DevelopmentTeamEntity DevTeam { get; set; }
         public List<ReviewEntity> Reviews { get; set; }
     }
 }

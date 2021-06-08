@@ -44,13 +44,14 @@ namespace DigitalDistribution.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IdentityResult> RegisterUser(UserRegisterRequest userRequest, string role)
+        public async Task<IdentityResult> RegisterUser(UserRegisterRequest userRequest, string role,int? devTeamId)
         {
 
             var user = new UserEntity
             {
                 UserName = userRequest.Username,
-                Email = userRequest.Email
+                Email = userRequest.Email,
+                DevTeamId=devTeamId
             };
             
             
@@ -66,7 +67,7 @@ namespace DigitalDistribution.Services
 
             if (!roleResult.Succeeded)
             {
-                return result;
+                return roleResult;
             }
 
             return result;

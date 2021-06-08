@@ -7,6 +7,7 @@ using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Controllers
@@ -28,34 +29,32 @@ namespace DigitalDistribution.Controllers
             _profileService = profileService;
             _mapper = mapper;
         }
+
+
+        [HttpGet]
+        public async Task<ObjectResult> GetAllProfiles()
+        {
+            var profiles = await _profileService.Get().ToListAsync();
+            return Ok(_mapper.Map<List<ProfileDetailsResponse>>(profiles));
+        }
+
+        [HttpGet("{name}")]
+        public async Task<ObjectResult> GetProfilesByName([FromRoute] string name)
+        {
+            var profiles = await _profileService.Search(name);
+            return Ok(_mapper.Map<List<ProfileDetailsResponse>>(profiles));
+        }
+
         [HttpPost]
         public async Task<ObjectResult> AddProfile([FromBody] ProfileEntity profile)
         {
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
                .Include(p => p.Profile)
                .FirstOrDefaultAsync();
-
-            if (normalUser is null)
-                return Ok(null);
-
             if (normalUser?.Profile is null)
-            {
-                profile.UserId = normalUser.Id;
-                return Ok(await _profileService.Create(profile));
-            }
-            return Ok(null);//exception
-        }
-
-        [HttpGet]
-        public async Task<ObjectResult> GetProfiles()
-        {
-            var normalUser = await _userService.Get()
-                .Include(p=>p.Profile)
-                .FirstOrDefaultAsync();
-
-            if (normalUser is null)
                 return Ok(null);
-            return Ok(_mapper.Map<ProfileDetailsResponse>(normalUser.Profile));
+            profile.UserId = normalUser.Id;
+            return Ok(await _profileService.Create(profile));
         }
    
         [HttpPut("update")]

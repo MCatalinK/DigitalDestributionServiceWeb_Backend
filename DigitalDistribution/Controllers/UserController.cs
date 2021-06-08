@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using DigitalDistribution.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace DigitalDistribution.Controllers
 {
     [ApiController]
-    [Route("api/user")]
+    [Route("api/users")]
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
@@ -23,12 +24,19 @@ namespace DigitalDistribution.Controllers
         {
             return Ok(await _userService.GetUserDetails(User.GetUserId()));
         }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin/")]
+        public async Task<ObjectResult> GetAllUsers()
+        {
+            return Ok(await _userService.Get().ToListAsync());
+        }
+
 
         [HttpPost("register")]
         public async Task<ObjectResult> Register([FromBody] UserRegisterRequest userRequest,
-            [FromQuery] string role)
+            [FromQuery] string role,[FromRoute] int? devTeamId)
         {
-            return Ok(await _userService.RegisterUser(userRequest, role));
+            return Ok(await _userService.RegisterUser(userRequest, role,devTeamId));
         }
 
         [HttpPost("login")]
@@ -48,5 +56,6 @@ namespace DigitalDistribution.Controllers
         {
             return Ok(await _userService.RevokeRefreshToken(refreshTokenRequest.RefreshToken));
         }
+       
     }
 }

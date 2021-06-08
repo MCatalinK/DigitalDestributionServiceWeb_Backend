@@ -1,5 +1,6 @@
 using AutoMapper;
 using DigitalDistribution.Helpers;
+using DigitalDistribution.HostedServices;
 using DigitalDistribution.Models.Database;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Repositories;
@@ -84,29 +85,35 @@ namespace DigitalDistribution
                Configuration.GetConnectionString("DigitalServiceDb")));
 
             //Repositories
+            services.AddScoped<BaseRepository<BillingAddressEntity>>();
+            services.AddScoped<BaseRepository<UpdateEntity>>();
+            services.AddScoped<BaseRepository<DevelopmentTeamEntity>>();
+
+            services.AddScoped<ReviewRepository>();
             services.AddScoped<UserRepository>();
-            services.AddScoped<BillingAddressRepository>();
             services.AddScoped<CheckoutItemRepository>();
-            services.AddScoped<DevelopmentTeamRepository>();
             services.AddScoped<InvoiceRepository>();
             services.AddScoped<LibraryRepository>();
             services.AddScoped<ProductRepository>();
             services.AddScoped<ProfileRepository>();
-            services.AddScoped<UpdateRepository>();
 
 
             //Services
+            services.AddScoped<BaseService<BillingAddressEntity>>();
+            services.AddScoped<BaseService<UpdateEntity>>();
+            services.AddScoped<BaseService<DevelopmentTeamEntity>>();
+            
+            services.AddScoped<ReviewService>();
             services.AddScoped<UserService>();
-            services.AddScoped<BillingAddressService>();
             services.AddScoped<CheckoutItemService>();
-            services.AddScoped<DevelopmentTeamService>();
             services.AddScoped<InvoiceService>();
             services.AddScoped<LibraryService>();
             services.AddScoped<ProductService>();
             services.AddScoped<ProfileService>();
-            services.AddScoped<UpdateService>();
 
             services.AddSingleton(new MapperConfiguration(p => p.AddProfile(new MappingProfile())).CreateMapper());
+            services.AddHostedService<SeedDatabaseHostedService>();
+
 
             services.AddControllers().AddNewtonsoftJson(x =>
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);

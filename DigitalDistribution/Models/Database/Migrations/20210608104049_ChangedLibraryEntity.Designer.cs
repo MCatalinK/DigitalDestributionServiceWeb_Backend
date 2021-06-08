@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalDistribution.Models.Database.Migrations
 {
     [DbContext(typeof(DigitalDistributionDbContext))]
-    [Migration("20210607093836_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20210608104049_ChangedLibraryEntity")]
+    partial class ChangedLibraryEntity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,7 +46,7 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("StreetAdress")
+                    b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
@@ -65,16 +65,23 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.CheckoutItemEntity", b =>
                 {
-                    b.Property<int>("InvoiceId")
-                        .HasColumnType("int");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("ProductId")
+                    b.Property<int>("InvoiceId")
                         .HasColumnType("int");
 
                     b.Property<string>("Licence")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("InvoiceId", "ProductId");
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
 
                     b.HasIndex("ProductId");
 
@@ -145,18 +152,28 @@ namespace DigitalDistribution.Models.Database.Migrations
 
             modelBuilder.Entity("DigitalDistribution.Models.Database.Entities.LibraryProductEntity", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId", "ProductId");
+                    b.Property<string>("Licence")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("LibraryItems");
                 });
@@ -232,9 +249,6 @@ namespace DigitalDistribution.Models.Database.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime>("LastOnline")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -626,14 +640,11 @@ namespace DigitalDistribution.Models.Database.Migrations
                     b.HasOne("DigitalDistribution.Models.Database.Entities.ProductEntity", "Product")
                         .WithMany("Reviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("DigitalDistribution.Models.Database.Entities.ProfileEntity", "Profile")
                         .WithMany("Reviews")
-                        .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProfileId");
 
                     b.Navigation("Product");
 

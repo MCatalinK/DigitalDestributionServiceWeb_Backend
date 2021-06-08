@@ -3,7 +3,6 @@ using DigitalDistribution.Models.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Repositories
@@ -26,12 +25,15 @@ namespace DigitalDistribution.Repositories
         {
             foreach(var item in invoice.CheckoutItems)
             {
-                await _dbContext.LibraryItems.AddAsync(new LibraryProductEntity
+                var libraryItem=new LibraryProductEntity
                 {
                     DateAdded = DateTime.Now,
+                    Licence = item.Licence,
                     UserId = user.Id,
                     ProductId = item.ProductId
-                });
+                };
+                user.LibraryItems.Add(libraryItem);
+                await _dbContext.LibraryItems.AddAsync(libraryItem); 
             }
             await _dbContext.SaveChangesAsync();
             return true;

@@ -30,14 +30,6 @@ namespace DigitalDistribution.Models.Database
         {
             base.OnModelCreating(modelBuilder);
 
-                
-            modelBuilder.Entity<CheckoutItemEntity>()
-                .HasKey(p => new { p.InvoiceId, p.ProductId });
-
-            modelBuilder.Entity<LibraryProductEntity>()
-                .HasKey(p => new { p.UserId, p.ProductId });
-
-
             #region 1:1 Relationships
 
             modelBuilder.Entity<UserEntity>()
@@ -117,13 +109,13 @@ namespace DigitalDistribution.Models.Database
                 .HasMany(e => e.Reviews)
                 .WithOne(e => e.Profile)
                 .HasForeignKey(fr => fr.ProfileId)
-                .IsRequired();
+                .IsRequired(false);
 
             modelBuilder.Entity<ProductEntity>()
                 .HasMany(e => e.Reviews)
                 .WithOne(e => e.Product)
                 .HasForeignKey(fk => fk.ProductId)
-                .IsRequired()
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
             //Bills

@@ -25,24 +25,21 @@ namespace DigitalDistribution.Repositories
         }
         public async Task<bool> Delete(InvoiceEntity invoice, ProductEntity product)
         {
-            var item = await _dbContext.InvoiceItems.Where(p => p.InvoiceId == invoice.Id && p.ProductId == product.Id).FirstOrDefaultAsync();
+            var item = await _dbContext.InvoiceItems
+                .Where(p => p.InvoiceId == invoice.Id && p.ProductId == product.Id)
+                .FirstOrDefaultAsync();
 
             if(item!=null)
             {
+                invoice.Price -= product.Price;
                 _dbContext.InvoiceItems.Remove(item);
                 await _dbContext.SaveChangesAsync();
                 return true;
             }
             return false;
         }
-        public async Task<CheckoutItemEntity> Create(InvoiceEntity invoice, ProductEntity product)
+        public async Task<CheckoutItemEntity> Create(CheckoutItemEntity item)
         {
-            CheckoutItemEntity item = new()
-            {
-                InvoiceId = invoice.Id,
-                ProductId = product.Id,
-                Licence = HelperExtensionMethods.CreateLicence()
-            };
             EntityEntry<CheckoutItemEntity> result = await _dbContext.InvoiceItems.AddAsync(item);
             await _dbContext.SaveChangesAsync();
             return result.Entity;

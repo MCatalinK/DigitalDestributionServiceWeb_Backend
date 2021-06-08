@@ -16,11 +16,11 @@ namespace DigitalDistribution.Controllers
     [Route("api/addresses")]
     public class BillingAddressController : ControllerBase
     {
-        private readonly BillingAddressService _billingAddressService;
+        private readonly BaseService<BillingAddressEntity> _billingAddressService;
         private readonly UserService _userService;
         private readonly IMapper _mapper;
 
-        public BillingAddressController(BillingAddressService billingAddressService,
+        public BillingAddressController(BaseService<BillingAddressEntity> billingAddressService,
             UserService userService,
             IMapper mapper)
         {
@@ -34,6 +34,7 @@ namespace DigitalDistribution.Controllers
         {
             var user = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(a => a.Address)
+                .Include(p=>p.Profile)
                 .FirstOrDefaultAsync();
 
             if (user?.Address is null)
@@ -58,7 +59,6 @@ namespace DigitalDistribution.Controllers
                 return Ok(await _billingAddressService.Create(address));
             }
             return Ok(null);//exception
-           
         }
 
         [HttpDelete]

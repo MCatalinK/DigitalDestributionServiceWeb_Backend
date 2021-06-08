@@ -25,5 +25,13 @@ namespace DigitalDistribution.Services
         {
             return await _productRepository.Search(text);
         }
+        public async Task<List<ProductEntity>> GetProductByPrice(float maxLimit,float lowerLimit)
+        {
+            return await _productRepository.GetProductByPrice(maxLimit, lowerLimit);
+        }
+        public async Task<List<ProductEntity>> GetProductByRating(int minRating)
+        {
+            return await _productRepository.GetProductByRating(minRating);
+        }
     }
 }

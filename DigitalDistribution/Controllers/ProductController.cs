@@ -2,11 +2,13 @@
 using DigitalDistribution.Helpers;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.Product;
+using DigitalDistribution.Models.Database.Requests.Update;
 using DigitalDistribution.Models.Database.Responses.Product;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,12 +20,12 @@ namespace DigitalDistribution.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ProductService _productService;
-        private readonly UpdateService _updateService;
+        private readonly BaseService<UpdateEntity> _updateService;
         private readonly UserService _userService;
         private readonly IMapper _mapper;
 
         public ProductController(ProductService productService,
-            UpdateService updateService,
+            BaseService<UpdateEntity> updateService,
             UserService userService,
             IMapper mapper)
         {
@@ -33,6 +35,7 @@ namespace DigitalDistribution.Controllers
             _mapper = mapper;
 
         }
+
         [HttpGet]
         public async Task<ObjectResult> GetAllProducts()
         {
@@ -40,43 +43,46 @@ namespace DigitalDistribution.Controllers
             if (products is null)
                 return Ok(null);
 
-            return Ok(_mapper.Map<ProductResponse>(products));
+            return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
+
         [HttpGet("{text}")]
         public async Task<ObjectResult> SearchProduct([FromRoute] string text)
         {
             var result = await _productService.Search(text);
             if (result is null)
                 return Ok(null);
-            return Ok(_mapper.Map<ProductResponse>(result));
+            return Ok(_mapper.Map<List<ProductResponse>>(result));
         }
 
-        [HttpGet("price/{upperLimit}_{lowerLimit}")]
+        [HttpGet("price/{upperLimit}&{lowerLimit}")]
         public async Task<ObjectResult> GetProductByPrice([FromRoute] float upperLimit,[FromRoute] float lowerLimit = 0)
         {
-            var products = await _productService.Get(p => p.Price <= upperLimit && p.Price >= lowerLimit).ToListAsync();
+            var products = await _productService.GetProductByPrice(upperLimit, lowerLimit);
             if (products is null)
                 return Ok(null);
 
-            return Ok(_mapper.Map<ProductResponse>(products));
+            return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
 
         [HttpGet("rating/{minimalLimit}")]
-        public async Task<ObjectResult> GetProductByRating( [FromRoute] int minimalLimit)
+        public async Task<ObjectResult> GetProductByRating([FromRoute] int minimalLimit)
         {
-            var products = await _productService.Get(p => p.Rating >= minimalLimit).ToListAsync();
+            var products = await _productService.GetProductByRating(minimalLimit);
             if (products is null)
                 return Ok(null);
 
-            return Ok(_mapper.Map<ProductResponse>(products));
+            return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpPost]
         public async Task<ObjectResult> NewProduct([FromBody] ProductEntity product)
         {
             return Ok(await _productService.Create(product));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{productId}")]
         public async Task<ObjectResult> DeleteProduct([FromRoute] int productId)
         {
@@ -86,6 +92,7 @@ namespace DigitalDistribution.Controllers
             return Ok(_productService.Delete(result));
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpPut("update/{productId}")]
         public async Task<ObjectResult>UpdateProduct([FromRoute]int productId,UpdateProductRequest productReq)
         {
@@ -97,6 +104,7 @@ namespace DigitalDistribution.Controllers
 
         //updates
 
+        [Authorize(Roles = "Developer")]
         [HttpPost("updates/{productId}")]
         public async Task<ObjectResult> AddUpdate([FromBody] UpdateEntity update, [FromRoute] int productId)
         {
@@ -105,7 +113,7 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p => p.Products.Where(u => u.Id == productId))
                .FirstOrDefaultAsync();
 
-            if (normalUser?.DevTeam.Products.First() is null)
+            if (normalUser?.DevTeam.Products.FirstOrDefault() is null)
                 return Ok(null);//exception
 
             update.ProductId = normalUser.DevTeam.Products.First().Id;
@@ -113,24 +121,24 @@ namespace DigitalDistribution.Controllers
            
         }
 
-        [HttpDelete("updates/{updateId},{productId}")]
-        public async Task<ObjectResult> DeleteUpdate([FromRoute] int updateId, [FromRoute] int productId)
+        [Authorize(Roles = "Developer")]
+        [HttpPut("updates/{updateId}")]
+        public async Task<ObjectResult> ChangeUpdate([FromRoute] int updateId,[FromBody] UpdateRequest update)
         {
-            var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
+            var devUser = await _userService.Get(p => p.Id == User.GetUserId())
                .Include(p => p.DevTeam)
-               .ThenInclude(p => p.Products.Where(u=>u.Id==productId))
                .FirstOrDefaultAsync();
 
-            if (normalUser?.DevTeam.Products.First() is null)
+            var tmpUpdate = await _updateService.Get(p => p.Id == updateId)
+                .Include(p => p.Product.DevTeamId == devUser.DevTeamId)
+                .FirstOrDefaultAsync();
+
+
+
+            if (tmpUpdate?.Product is null)
                 return Ok(null);//exception
 
-            var result = await _productService.Search(productId);
-
-            if (result is null)
-                return Ok(null);
-
-            var update = await _updateService.Get(p => p.Id == updateId).FirstOrDefaultAsync();
-            return Ok(await _updateService.Delete(update));    
+            return Ok(await _updateService.Update(_mapper.Map(update, tmpUpdate)));
         }
     }
 }

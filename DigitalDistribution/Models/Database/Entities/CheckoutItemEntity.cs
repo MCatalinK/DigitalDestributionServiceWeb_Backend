@@ -5,6 +5,9 @@ namespace DigitalDistribution.Models.Database.Entities
 {
     public class CheckoutItemEntity
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         public int ProductId { get; set; }
         public int InvoiceId { get; set; }
         public string Licence { get; set; }

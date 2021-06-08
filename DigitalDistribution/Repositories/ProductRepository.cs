@@ -24,5 +24,17 @@ namespace DigitalDistribution.Repositories
                 .Where(p => p.Name.Contains(text))
                 .ToListAsync();
         }
+        public async Task<List<ProductEntity>> GetProductByPrice(float upperLimit,float lowerLimit)
+        {
+            return await Table
+                .Where(p => p.Price >= lowerLimit && p.Price <= upperLimit)
+                .ToListAsync();
+        }
+        public async Task<List<ProductEntity>> GetProductByRating(int minRating)
+        {
+            return await Table
+                .Where(p => p.Rating >= minRating)
+                .ToListAsync();
+        }
     }
 }

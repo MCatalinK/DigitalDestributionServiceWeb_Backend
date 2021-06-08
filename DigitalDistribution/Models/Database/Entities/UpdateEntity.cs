@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DigitalDistribution.Models.Database.Entities
 {
@@ -11,5 +10,4 @@ namespace DigitalDistribution.Models.Database.Entities
         public int ProductId { get; set; }
         [ForeignKey("ProductId")] public ProductEntity Product { get; set; }
     }
-
 }

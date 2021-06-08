@@ -7,7 +7,6 @@ namespace DigitalDistribution.Models.Database.Responses.Profile
         public string DisplayName { get; set; }
         public string Avatar { get; set; }
         public string Description { get; set; }
-        public DateTime LastOnline { get; set; }
         
     }
 }

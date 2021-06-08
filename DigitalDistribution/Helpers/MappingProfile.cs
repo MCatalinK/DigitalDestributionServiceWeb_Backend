@@ -6,11 +6,12 @@ using DigitalDistribution.Models.Database.Requests.DevelopmentTeam;
 using DigitalDistribution.Models.Database.Requests.Invoice;
 using DigitalDistribution.Models.Database.Requests.Profile;
 using DigitalDistribution.Models.Database.Requests.Review;
+using DigitalDistribution.Models.Database.Requests.Update;
 using DigitalDistribution.Models.Database.Responses.BillingAddress;
-using DigitalDistribution.Models.Database.Responses.DevelopmentTeam;
 using DigitalDistribution.Models.Database.Responses.Invoice;
 using DigitalDistribution.Models.Database.Responses.Product;
 using DigitalDistribution.Models.Database.Responses.Profile;
+using DigitalDistribution.Models.Database.Responses.Review;
 
 
 #endregion
@@ -28,13 +29,19 @@ namespace DigitalDistribution.Helpers
 
             CreateMap<UpdateDevTeamRequest, DevelopmentTeamEntity>()
                 .ForAllMembers(p => p.Condition((q, s, m) => m != null));
-            CreateMap<DevelopmentTeamEntity, DevelopmentTeamResponse>();
+
+            CreateMap<UpdateInvoiceRequest, InvoiceEntity>()
+                .ForAllMembers(p => p.Condition((q, s, m) => m != null));
 
             CreateMap<ProductEntity, ProductResponse>();
 
             CreateMap<InvoiceEntity, InvoiceResponse>();
 
             CreateMap<ReviewEntity, UpdateReviewRequest>();
+
+            CreateMap<UpdateEntity, UpdateRequest>();
+
+            CreateMap<ReviewEntity, ReviewResponse>();
         }
     }
 }

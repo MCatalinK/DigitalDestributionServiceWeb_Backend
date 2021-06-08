@@ -1,8 +1,6 @@
 ﻿using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Repositories;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Services
@@ -16,10 +14,10 @@ namespace DigitalDistribution.Services
             _itemRepo = itemRepo;
         }
 
-        public async Task<CheckoutItemEntity> AddItem(InvoiceEntity invoice,ProductEntity product)
+        public async Task<CheckoutItemEntity> AddItem(CheckoutItemEntity item)
         {
-            var item = await _itemRepo.Create(invoice, product);
-            return item;
+            var result = await _itemRepo.Create(item);
+            return result;
         }
         public async Task<bool> Delete(InvoiceEntity invoice, ProductEntity product)
         {
