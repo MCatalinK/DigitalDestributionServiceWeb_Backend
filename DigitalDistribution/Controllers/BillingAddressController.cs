@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DigitalDistribution.Helpers;
+using DigitalDistribution.Models.Constants;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.BillingAddress;
 using DigitalDistribution.Models.Database.Responses.BillingAddress;
+using DigitalDistribution.Models.Exceptions;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +40,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.Address is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.BillingAddressNotFound);
 
             return Ok(_mapper.Map<BillingAddressResponse>(user.Address));
         }
@@ -50,15 +52,12 @@ namespace DigitalDistribution.Controllers
               .Include(p=>p.Address)
               .FirstOrDefaultAsync();
 
-            if (normalUser is null)
-                return Ok(null);
-
-            if (normalUser?.Profile is null)
+            if (normalUser?.Address is null)
             {
                 address.UserId = normalUser.Id;
                 return Ok(await _billingAddressService.Create(address));
             }
-            return Ok(null);//exception
+            throw new ItemExistsException(StringConstants.AddressAlreadyExists);
         }
 
         [HttpDelete]
@@ -69,7 +68,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.Address == null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.BillingAddressNotFound);
             return Ok(await _billingAddressService.Delete(user.Address));
         }
 
@@ -81,7 +80,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.Address is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.BillingAddressNotFound);
 
             return Ok(await _billingAddressService.Update(_mapper.Map(address, user.Address)));
         }

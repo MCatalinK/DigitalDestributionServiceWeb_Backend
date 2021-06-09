@@ -1,6 +1,7 @@
 using AutoMapper;
 using DigitalDistribution.Helpers;
 using DigitalDistribution.HostedServices;
+using DigitalDistribution.Middlewares;
 using DigitalDistribution.Models.Database;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Repositories;
@@ -16,6 +17,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Events;
 using System;
 using System.Text;
 
@@ -125,6 +128,14 @@ namespace DigitalDistribution
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DigitalDistribution", Version = "v1" });
             });
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.WithProperty("Application", "DigitalService")
+                .Enrich.FromLogContext()
+                .WriteTo.File("log.txt")
+                .CreateLogger();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -136,6 +147,7 @@ namespace DigitalDistribution
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DigitalDistribution v1"));
             }
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

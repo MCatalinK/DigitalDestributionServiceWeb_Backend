@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DigitalDistribution.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using DigitalDistribution.Models.Exceptions;
+using DigitalDistribution.Models.Constants;
 
 namespace DigitalDistribution.Controllers
 {
@@ -24,6 +26,7 @@ namespace DigitalDistribution.Controllers
         {
             return Ok(await _userService.GetUserDetails(User.GetUserId()));
         }
+
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/")]
         public async Task<ObjectResult> GetAllUsers()
@@ -32,6 +35,7 @@ namespace DigitalDistribution.Controllers
                 .Include(p=>p.UserRoles)
                 .ToListAsync());
         }
+
         [Authorize]
         [HttpGet("library")]
         public async Task<ObjectResult> GetItemsFromLibrary()
@@ -42,11 +46,10 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.LibraryItems is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.LibraryNotFound);
 
             return Ok(user.LibraryItems);
         }
-
 
         [HttpPost("register/{devTeamId}")]
         public async Task<ObjectResult> Register([FromBody] UserRegisterRequest userRequest,
@@ -71,7 +74,6 @@ namespace DigitalDistribution.Controllers
         public async Task<ObjectResult> RevokeToken([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             return Ok(await _userService.RevokeRefreshToken(refreshTokenRequest.RefreshToken));
-        }
-       
+        }   
     }
 }

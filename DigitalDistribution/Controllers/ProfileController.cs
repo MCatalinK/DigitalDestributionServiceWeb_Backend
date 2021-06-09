@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DigitalDistribution.Helpers;
+using DigitalDistribution.Models.Constants;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.Profile;
 using DigitalDistribution.Models.Database.Responses.Profile;
+using DigitalDistribution.Models.Exceptions;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,6 +39,9 @@ namespace DigitalDistribution.Controllers
             var profiles = await _profileService.Get()
                 .ToListAsync();
 
+            if (profiles is null)
+                throw new NotFoundException(StringConstants.ProfileNotFound);
+
             return Ok(_mapper.Map<List<ProfileDetailsResponse>>(profiles));
         }
 
@@ -44,6 +49,9 @@ namespace DigitalDistribution.Controllers
         public async Task<ObjectResult> GetProfilesByName([FromRoute] string name)
         {
             var profiles = await _profileService.Search(name);
+            if (profiles is null)
+                throw new NotFoundException(StringConstants.ProfileNotFound);
+
             return Ok(_mapper.Map<List<ProfileDetailsResponse>>(profiles));
         }
 
@@ -53,10 +61,13 @@ namespace DigitalDistribution.Controllers
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
                .Include(p => p.Profile)
                .FirstOrDefaultAsync();
+
             if (normalUser?.Profile is null)
-                return Ok(null);
-            profile.UserId = normalUser.Id;
-            return Ok(await _profileService.Create(profile));
+            {
+                profile.UserId = normalUser.Id;
+                return Ok(await _profileService.Create(profile));
+            }
+            throw new ItemExistsException(StringConstants.ProfileExists);
         }
    
         [HttpPut("update")]
@@ -67,7 +78,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (normalUser?.Profile == null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.ProfileNotFound);
 
             return Ok(await _profileService.Update(_mapper.Map(profile, normalUser.Profile)));
         }

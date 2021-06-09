@@ -19,12 +19,9 @@ namespace DigitalDistribution.Models.Database
         public DbSet<ProductEntity> Products { get; set; }
         public DbSet<ProfileEntity> Profiles { get; set; }
         public DbSet<UpdateEntity> Updates { get; set; }
-
-
         public DbSet<CheckoutItemEntity> InvoiceItems { get; set; }
         public DbSet<LibraryProductEntity> LibraryItems { get; set; }
         public DbSet<ReviewEntity> Reviews { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -109,7 +106,9 @@ namespace DigitalDistribution.Models.Database
                 .HasMany(e => e.Reviews)
                 .WithOne(e => e.Profile)
                 .HasForeignKey(fr => fr.ProfileId)
-                .IsRequired(false);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+            
 
             modelBuilder.Entity<ProductEntity>()
                 .HasMany(e => e.Reviews)
@@ -132,7 +131,6 @@ namespace DigitalDistribution.Models.Database
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
             #endregion
-
         }
     }
 }

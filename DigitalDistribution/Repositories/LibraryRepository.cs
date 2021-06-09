@@ -16,11 +16,6 @@ namespace DigitalDistribution.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<List<LibraryProductEntity>> GetAll()
-        {
-            return await _dbContext.LibraryItems.ToListAsync();
-        }
-
         public async Task<bool> Create(UserEntity user ,InvoiceEntity invoice)
         {
             foreach(var item in invoice.CheckoutItems)

@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using DigitalDistribution.Helpers;
+using DigitalDistribution.Models.Constants;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.DevelopmentTeam;
+using DigitalDistribution.Models.Exceptions;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +35,7 @@ namespace DigitalDistribution.Controllers
                 .ToListAsync();
 
             if (result is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoDevTeams);
 
             return Ok(result);
         }
@@ -42,6 +44,10 @@ namespace DigitalDistribution.Controllers
         [HttpPost]
         public async Task<ObjectResult> AddDevelopmentTeam([FromBody] DevelopmentTeamEntity team)
         {
+            var devTeam = await _developmentTeamService.Get().ToListAsync();
+            if (devTeam.Contains(team))
+                throw new ItemExistsException(StringConstants.DevTeamExists);
+
             return Ok(await _developmentTeamService.Create(team));
         }
 
@@ -51,7 +57,8 @@ namespace DigitalDistribution.Controllers
         {
             var devTeam = await _developmentTeamService.Get(p=>p.Id==teamId).FirstOrDefaultAsync();
             if (devTeam is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoDevTeamFound);
+
             return Ok(await _developmentTeamService.Delete(devTeam));
         }
 
@@ -64,10 +71,9 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (devTeam is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoDevTeamFound);
 
             return Ok(await _developmentTeamService.Update(_mapper.Map(team, devTeam)));
         }
-
     }
 }

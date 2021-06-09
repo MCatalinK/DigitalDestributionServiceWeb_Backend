@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DigitalDistribution.Models.Database.Entities
@@ -19,6 +20,11 @@ namespace DigitalDistribution.Models.Database.Entities
             return obj is CheckoutItemEntity entity &&
                    ProductId == entity.ProductId &&
                    InvoiceId == entity.InvoiceId;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ProductId, InvoiceId);
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DigitalDistribution.Helpers;
+using DigitalDistribution.Models.Constants;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.Invoice;
 using DigitalDistribution.Models.Database.Responses.Invoice;
+using DigitalDistribution.Models.Exceptions;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +52,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (normalUser?.Bills is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoInvoicesFound);
 
             return Ok(_mapper.Map<List<InvoiceResponse>>(normalUser.Bills));
         }
@@ -58,6 +60,9 @@ namespace DigitalDistribution.Controllers
         [HttpGet("{lowerLimit}&{upperLimit}")]
         public async Task<ObjectResult> GetInvoicesByPrice([FromRoute] float lowerLimit = 0,[FromRoute] float upperLimit = 0)
         {
+            if (lowerLimit < 0 || lowerLimit > upperLimit)
+                throw new BadRequestException(StringConstants.BadProductPriceEx);
+
             var user = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(p=>p.Bills.Where(u=>u.Price>=lowerLimit && u.Price<=upperLimit && u.IsPayed==true))
                 .ThenInclude(p=>p.CheckoutItems)
@@ -65,7 +70,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.Bills.FirstOrDefault() is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoInvoicesFound);
 
             return Ok(_mapper.Map<List<InvoiceResponse>>(user.Bills));
         }
@@ -80,7 +85,7 @@ namespace DigitalDistribution.Controllers
                  .FirstOrDefaultAsync();
 
             if (normalUser?.Bills.FirstOrDefault() is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoInvoicesFound);
 
             return Ok(_mapper.Map<InvoiceResponse>(normalUser.Bills.FirstOrDefault()));
         }
@@ -92,13 +97,14 @@ namespace DigitalDistribution.Controllers
                 .Include(p => p.Bills.Where(p => p.IsPayed == false))
                 .ThenInclude(p=>p.CheckoutItems)
                 .FirstOrDefaultAsync();
+
             if (user?.Bills.FirstOrDefault() is null)
             {
                 invoice.UserId = user.Id;
                 return Ok(await _invoiceService.Create(invoice));
             }
-            else
-                return Ok(null);//error
+
+            throw new ItemExistsException(StringConstants.InvoiceExists);
         }
         [HttpDelete]
         public async Task<ObjectResult> DeleteCurrentInvoice()
@@ -108,9 +114,8 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p => p.CheckoutItems)
                .FirstOrDefaultAsync();
             if (user?.Bills.FirstOrDefault() is null)
-            {
-                return Ok(null);
-            }
+                throw new NotFoundException(StringConstants.NoInvoicesFound);
+            
             return Ok(await _invoiceService.Delete(user.Bills.First()));
         }
 
@@ -128,9 +133,10 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.Bills.FirstOrDefault() is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoInvoicesFound);
+
             if (user.LibraryItems.FirstOrDefault() != null)
-                return Ok(null);
+                throw new ItemExistsException(StringConstants.LibraryItemExists);
             
 
 
@@ -139,13 +145,13 @@ namespace DigitalDistribution.Controllers
             itemEntity.InvoiceId = user.Bills.First().Id;
 
             if (user.Bills.FirstOrDefault().CheckoutItems.Contains(itemEntity))
-                return Ok(null);
+                throw new ItemExistsException(StringConstants.InvoiceProductExists);
             
             return Ok(await _itemService.AddItem(itemEntity));
         }
 
         [HttpDelete("delete/{productId}")]
-        public async Task<ObjectResult> DeleteProduct([FromQuery] int productId)
+        public async Task<ObjectResult> DeleteProduct([FromRoute] int productId)
         {
             var normalUser = await _userService.Get(p => p.Id == User.GetUserId())
                 .Include(u => u.Bills.Where(p => p.IsPayed == false))
@@ -156,14 +162,13 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (product is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
 
             if (normalUser?.Bills.FirstOrDefault() is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoInvoicesFound);
 
             return Ok(await _itemService.Delete(normalUser.Bills.First(), product));
         }
-
 
         [HttpPut]
         public async Task<ObjectResult> PayInvoice()
@@ -175,7 +180,7 @@ namespace DigitalDistribution.Controllers
                 .FirstOrDefaultAsync();
 
             if (user?.Bills.FirstOrDefault() is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoInvoicesFound); ;
 
             _ = await _libraryService.AddItem(user, user.Bills.First());
 

@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using DigitalDistribution.Helpers;
+using DigitalDistribution.Models.Constants;
 using DigitalDistribution.Models.Database.Entities;
 using DigitalDistribution.Models.Database.Requests.Product;
 using DigitalDistribution.Models.Database.Requests.Update;
 using DigitalDistribution.Models.Database.Responses.Product;
+using DigitalDistribution.Models.Exceptions;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +35,6 @@ namespace DigitalDistribution.Controllers
             _updateService = updateService;
             _userService = userService;
             _mapper = mapper;
-
         }
 
         [HttpGet]
@@ -46,7 +47,7 @@ namespace DigitalDistribution.Controllers
                 .ToListAsync();
 
             if (products is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
             
             return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
@@ -56,16 +57,20 @@ namespace DigitalDistribution.Controllers
         {
             var result = await _productService.Search(text);
             if (result is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
+
             return Ok(_mapper.Map<List<ProductResponse>>(result));
         }
 
         [HttpGet("price/{lowerLimit}&{upperLimit}")]
         public async Task<ObjectResult> GetProductByPrice([FromRoute] float lowerLimit,[FromRoute] float upperLimit = 0)
         {
+            if (lowerLimit < 0 || lowerLimit > upperLimit)
+                throw new BadRequestException(StringConstants.BadProductPriceEx);
+
             var products = await _productService.GetProductByPrice(upperLimit, lowerLimit);
             if (products is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
 
             return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
@@ -73,9 +78,12 @@ namespace DigitalDistribution.Controllers
         [HttpGet("rating/{minimalLimit}")]
         public async Task<ObjectResult> GetProductByRating([FromRoute] int minimalLimit)
         {
+            if(minimalLimit<0 || minimalLimit>10)
+                throw new BadRequestException(StringConstants.BadReviewRatingEx);
+
             var products = await _productService.GetProductByRating(minimalLimit);
             if (products is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
 
             return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
@@ -93,7 +101,8 @@ namespace DigitalDistribution.Controllers
         {
             var result = await _productService.Get(p => p.Id == productId).FirstOrDefaultAsync();
             if (result is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
+
             return Ok(_productService.Delete(result));
         }
 
@@ -103,7 +112,8 @@ namespace DigitalDistribution.Controllers
         {
             var product = await _productService.Get(p => p.Id == productId).FirstOrDefaultAsync();
             if (product is null)
-                return Ok(null);
+                throw new NotFoundException(StringConstants.NoProductFound);
+
             return Ok(await _productService.Update(_mapper.Map(productReq, product)));
         }
 
@@ -120,7 +130,7 @@ namespace DigitalDistribution.Controllers
                .FirstOrDefaultAsync();
 
             if (devUser?.DevTeam.Products.FirstOrDefault() is null)
-                return Ok(null);//exception
+                throw new NotFoundException(StringConstants.NoProductFound);
 
             update.ProductId = devUser.DevTeam.Products.First().Id;
             return Ok(await _updateService.Create(update)); 
@@ -137,9 +147,8 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p=>p.Updates.Where(u=>u.Id==updateId))
                .FirstOrDefaultAsync();
 
-
             if (devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault() is null)
-                return Ok(null);//exception
+                throw new NotFoundException(StringConstants.UpdateNotFound);
 
             return Ok(await _updateService.Update(_mapper.Map(update, devUser.DevTeam.Products.First().Updates.First())));
         }
