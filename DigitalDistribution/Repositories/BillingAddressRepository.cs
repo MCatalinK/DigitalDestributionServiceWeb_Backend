@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace DigitalDistribution.Repositories
 {
-    public class ReviewRepository
+    public class BillingAddressRepository
     {
         private readonly DigitalDistributionDbContext _dbContext;
-        private readonly DbSet<ReviewEntity> Table;
-        public ReviewRepository(DigitalDistributionDbContext dbContext)
+        private readonly DbSet<BillingAddressEntity> Table;
+        public BillingAddressRepository(DigitalDistributionDbContext dbContext)
         {
             _dbContext = dbContext;
-            Table = dbContext.Set<ReviewEntity>();
+            Table = dbContext.Set<BillingAddressEntity>();
         }
-        
-        public IQueryable<ReviewEntity> Get(Expression<Func<ReviewEntity, bool>> predicate = null)
+
+        public IQueryable<BillingAddressEntity> Get(Expression<Func<BillingAddressEntity, bool>> predicate = null)
         {
             if (predicate != null)
                 return Table.Where(predicate);
@@ -31,7 +31,7 @@ namespace DigitalDistribution.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<ReviewEntity> Create(ReviewEntity entity, bool commit = true)
+        public async Task<BillingAddressEntity> Create(BillingAddressEntity entity, bool commit = true)
         {
             await Table.AddAsync(entity);
 
@@ -41,7 +41,7 @@ namespace DigitalDistribution.Repositories
             return entity;
         }
 
-        public async Task<ReviewEntity> Update(ReviewEntity entity, bool commit = true)
+        public async Task<BillingAddressEntity> Update(BillingAddressEntity entity, bool commit = true)
         {
             Table.Update(entity);
 
@@ -51,7 +51,7 @@ namespace DigitalDistribution.Repositories
             return entity;
         }
 
-        public async Task<ReviewEntity> Delete(ReviewEntity entity, bool commit = true)
+        public async Task<BillingAddressEntity> Delete(BillingAddressEntity entity, bool commit = true)
         {
             Table.Remove(entity);
 

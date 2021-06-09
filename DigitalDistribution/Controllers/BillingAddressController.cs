@@ -18,11 +18,11 @@ namespace DigitalDistribution.Controllers
     [Route("api/addresses")]
     public class BillingAddressController : ControllerBase
     {
-        private readonly BaseService<BillingAddressEntity> _billingAddressService;
+        private readonly BillingAddressService _billingAddressService;
         private readonly UserService _userService;
         private readonly IMapper _mapper;
 
-        public BillingAddressController(BaseService<BillingAddressEntity> billingAddressService,
+        public BillingAddressController(BillingAddressService billingAddressService,
             UserService userService,
             IMapper mapper)
         {

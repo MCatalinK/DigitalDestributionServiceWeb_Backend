@@ -88,10 +88,10 @@ namespace DigitalDistribution
                Configuration.GetConnectionString("DigitalServiceDb")));
 
             //Repositories
-            services.AddScoped<BaseRepository<BillingAddressEntity>>();
-            services.AddScoped<BaseRepository<UpdateEntity>>();
+                        
             services.AddScoped<BaseRepository<DevelopmentTeamEntity>>();
-
+            services.AddScoped<UpdateRepository>();
+            services.AddScoped<BillingAddressRepository>();
             services.AddScoped<ReviewRepository>();
             services.AddScoped<UserRepository>();
             services.AddScoped<CheckoutItemRepository>();
@@ -100,12 +100,11 @@ namespace DigitalDistribution
             services.AddScoped<ProductRepository>();
             services.AddScoped<ProfileRepository>();
 
-
             //Services
-            services.AddScoped<BaseService<BillingAddressEntity>>();
-            services.AddScoped<BaseService<UpdateEntity>>();
-            services.AddScoped<BaseService<DevelopmentTeamEntity>>();
             
+            services.AddScoped<BaseService<DevelopmentTeamEntity>>();
+            services.AddScoped<UpdateService>();
+            services.AddScoped<BillingAddressService>();
             services.AddScoped<ReviewService>();
             services.AddScoped<UserService>();
             services.AddScoped<CheckoutItemService>();

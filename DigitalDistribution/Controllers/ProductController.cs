@@ -22,12 +22,12 @@ namespace DigitalDistribution.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ProductService _productService;
-        private readonly BaseService<UpdateEntity> _updateService;
+        private readonly UpdateService _updateService;
         private readonly UserService _userService;
         private readonly IMapper _mapper;
 
         public ProductController(ProductService productService,
-            BaseService<UpdateEntity> updateService,
+            UpdateService updateService,
             UserService userService,
             IMapper mapper)
         {
@@ -117,7 +117,23 @@ namespace DigitalDistribution.Controllers
             return Ok(await _productService.Update(_mapper.Map(productReq, product)));
         }
 
-        //updates
+        [Authorize(Roles = "Developer")]
+        [HttpGet("developer")]
+        public async Task<ObjectResult> GetAllItemsForDevTeam()
+        {
+            var devUser = await _userService.Get(p => p.Id == User.GetUserId())
+                .Include(p => p.DevTeam)
+                .ThenInclude(p => p.Products)
+                .ThenInclude(p=>p.Updates)
+                .FirstOrDefaultAsync();
+
+            if (devUser?.DevTeam.Products is null)
+                throw new NotFoundException(StringConstants.NoProductFound);
+
+            return Ok(devUser.DevTeam.Products);
+        }
+
+        //Updates
 
         [Authorize(Roles = "Developer")]
         [HttpPost("updates/{productId}")]
@@ -129,12 +145,35 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p=>p.Updates)
                .FirstOrDefaultAsync();
 
+            if (devUser.DevTeam.Products.FirstOrDefault().Updates.Contains(update))
+                throw new ItemExistsException(StringConstants.UpdateExists);
+
             if (devUser?.DevTeam.Products.FirstOrDefault() is null)
                 throw new NotFoundException(StringConstants.NoProductFound);
 
-            update.ProductId = devUser.DevTeam.Products.First().Id;
-            return Ok(await _updateService.Create(update)); 
-           
+            var product = await _productService.Get(p=>p.Id==productId)
+                    .Include(p => p.Updates)
+                    .FirstOrDefaultAsync();
+
+            update.ProductId = product.Id;
+
+            return Ok(await _updateService.CreateUpdate(update));    
+        }
+
+        [Authorize(Roles = "Developer")]
+        [HttpDelete("updates/{productId}")]
+        public async Task<ObjectResult> DeleteLastUpdate([FromRoute] int productId)
+        {
+            var devUser = await _userService.Get(p => p.Id == User.GetUserId())
+               .Include(p => p.DevTeam)
+               .ThenInclude(p => p.Products.Where(p=>p.Id==productId))
+               .ThenInclude(p => p.Updates)
+               .FirstOrDefaultAsync();
+
+            if (devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault() is null)
+                throw new NotFoundException(StringConstants.UpdateNotFound);
+
+            return Ok(await _updateService.Delete(devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault()));
         }
 
         [Authorize(Roles = "Developer")]
@@ -149,6 +188,16 @@ namespace DigitalDistribution.Controllers
 
             if (devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault() is null)
                 throw new NotFoundException(StringConstants.UpdateNotFound);
+
+            if (devUser?.DevTeam.Products.FirstOrDefault().Version > update.Version)
+                throw new BadRequestException(StringConstants.BadUpdateEx);
+
+            var product = await _productService.Get()
+                    .Include(p => p.Updates.Where(u => u.Id == updateId))
+                    .FirstOrDefaultAsync();
+
+            product.Version = update.Version;
+            await _productService.Update(product);
 
             return Ok(await _updateService.Update(_mapper.Map(update, devUser.DevTeam.Products.First().Updates.First())));
         }

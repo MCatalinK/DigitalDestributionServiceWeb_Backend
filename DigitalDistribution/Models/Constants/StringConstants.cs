@@ -11,6 +11,7 @@
         public static string LibraryItemExists = "This item is already in the user's library";
         public static string ReviewExists = "The user made already a review for this product";
         public static string ProfileExists = "The user has already a profile";
+        public static string UpdateExists = "The update already exists";
 
         //Not found exceptions
         public static string BillingAddressNotFound = " Billing address wasn't found";
@@ -22,10 +23,13 @@
         public static string ProfileNotFound = "No profile found";
         public static string NoReviewFound = "No Review Found";
         public static string LibraryNotFound = "Library not found";
+        public static string LibraryItemNotFound = "The product isn't in your library, therefore you can't post a review :)";
+        public static string ProductInvoiceNotFound = "The product isn't on the list";
 
         //Bad request exceptions
         public static string BadReviewRatingEx = "The Rating can't be higher than 10 or lower than 0";
         public static string BadProductPriceEx = "The price can't be lower than 0";
+        public static string BadUpdateEx = "The version can't be lower than the previous one";
 
     }
 }

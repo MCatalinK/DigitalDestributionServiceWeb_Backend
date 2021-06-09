@@ -11,6 +11,7 @@ namespace DigitalDistribution.Models.Database.Entities
         public string Description { get; set; }
         public float Rating { get; set; } = 0;
         public float Price { get; set; }
+        public float Version { get; set; } = 0.1f;
         public string Currency { get; set; } = "USD";
         public int DevTeamId { get; set; }
         [ForeignKey("DevTeamId")] public DevelopmentTeamEntity DevTeam { get; set; }

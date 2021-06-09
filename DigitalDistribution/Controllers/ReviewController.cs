@@ -88,13 +88,16 @@ namespace DigitalDistribution.Controllers
             if (review.Rating > 10 || review.Rating < 0)
                 throw new BadRequestException(StringConstants.BadReviewRatingEx);
 
+
+
             var product = await _productService.Get(p => p.Id == productId)
                 .Include(p=>p.Reviews)
                 .FirstOrDefaultAsync();
 
-            var user = await _userService.Get(p => p.Id == User.GetUserId())
+            var user = await _userService.Get(p => p.Id == User.GetUserId())               
                 .Include(p => p.Profile)
                 .ThenInclude(p=>p.Reviews.Where(u=>u.ProductId==product.Id))
+                .Include(p => p.LibraryItems.Where(u => u.ProductId == productId))
                 .FirstOrDefaultAsync();
 
             if (product is null)
@@ -102,6 +105,9 @@ namespace DigitalDistribution.Controllers
 
             if (user.Profile is null)
                 throw new NotFoundException(StringConstants.ProfileNotFound);
+
+            if (user.LibraryItems is null)
+                throw new NotFoundException(StringConstants.LibraryItemNotFound);
 
             if (user?.Profile.Reviews.FirstOrDefault() is null)
             {

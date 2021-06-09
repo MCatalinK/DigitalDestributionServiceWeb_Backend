@@ -64,7 +64,9 @@ namespace DigitalDistribution.Repositories
 
         public async Task<T> Delete(T entity, bool commit = true)
         {
-            Table.Remove(entity);
+            entity.IsDeleted = true;
+            Table.Update(entity);
+            //Table.Remove(entity);
 
             if (commit)
                 await Commit();

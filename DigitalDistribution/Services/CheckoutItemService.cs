@@ -14,14 +14,14 @@ namespace DigitalDistribution.Services
             _itemRepo = itemRepo;
         }
 
-        public async Task<CheckoutItemEntity> AddItem(CheckoutItemEntity item)
+        public async Task<CheckoutItemEntity> AddItem(int userId,CheckoutItemEntity item)
         {
-            var result = await _itemRepo.Create(item);
+            var result = await _itemRepo.Create(userId,item);
             return result;
         }
-        public async Task<bool> Delete(InvoiceEntity invoice, ProductEntity product)
+        public async Task<CheckoutItemEntity> Delete(CheckoutItemEntity item)
         {
-            return await _itemRepo.Delete(invoice, product);
+            return await _itemRepo.Delete(item);
         }
         public async Task<List<CheckoutItemEntity>> GetAll()
         {

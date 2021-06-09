@@ -51,9 +51,9 @@ namespace DigitalDistribution.Controllers
             return Ok(user.LibraryItems);
         }
 
-        [HttpPost("register/{devTeamId}")]
+        [HttpPost("register")]
         public async Task<ObjectResult> Register([FromBody] UserRegisterRequest userRequest,
-            [FromQuery] string role,[FromRoute] int? devTeamId)
+            [FromQuery] string role,[FromQuery] int? devTeamId)
         {
             return Ok(await _userService.RegisterUser(userRequest, role,devTeamId));
         }

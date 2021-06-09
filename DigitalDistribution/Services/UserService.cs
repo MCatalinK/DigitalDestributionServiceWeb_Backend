@@ -49,14 +49,14 @@ namespace DigitalDistribution.Services
 
         public async Task<IdentityResult> RegisterUser(UserRegisterRequest userRequest, string role,int? devTeamId)
         {
-
             var user = new UserEntity
             {
                 UserName = userRequest.Username,
                 Email = userRequest.Email,
-                DevTeamId=devTeamId
-            };
-            
+                DevTeamId = devTeamId,
+                IsActive = true,
+                TermsAccepted = true
+            };        
             
             var result = await _userRepository.Register(user, userRequest.Password);
 

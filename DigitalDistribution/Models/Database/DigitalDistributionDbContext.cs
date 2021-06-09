@@ -27,6 +27,13 @@ namespace DigitalDistribution.Models.Database
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<ProductEntity>()
+                .HasQueryFilter(p => p.IsDeleted == false);
+            modelBuilder.Entity<DevelopmentTeamEntity>()
+                .HasQueryFilter(p => p.IsDeleted == false);
+            modelBuilder.Entity<UpdateEntity>()
+                .HasQueryFilter(p => p.IsDeleted == false);
+
             #region 1:1 Relationships
 
             modelBuilder.Entity<UserEntity>()
