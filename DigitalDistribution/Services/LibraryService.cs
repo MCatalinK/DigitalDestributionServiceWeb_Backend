@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Services
@@ -18,6 +19,10 @@ namespace DigitalDistribution.Services
         {
             _itemRepo = itemRepo;
             _productRepository = productRepository;
+        }
+        public IQueryable<LibraryProductEntity> Get(Expression<Func<LibraryProductEntity, bool>> predicate = null)
+        {
+            return _itemRepo.Get(predicate);
         }
 
         public async Task<bool> AddItem(UserEntity user, InvoiceEntity invoice)

@@ -8,6 +8,7 @@ using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Controllers
@@ -37,7 +38,7 @@ namespace DigitalDistribution.Controllers
             if (result is null)
                 throw new NotFoundException(StringConstants.NoDevTeams);
 
-            return Ok(result);
+            return Ok(_mapper.Map<List<DevelopmentTeamEntity>>(result));
         }
 
         [Authorize(Roles="Admin")]

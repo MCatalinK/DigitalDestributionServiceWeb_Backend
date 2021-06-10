@@ -1,9 +1,10 @@
-﻿using DigitalDistribution.Helpers;
-using DigitalDistribution.Models.Database;
+﻿using DigitalDistribution.Models.Database;
 using DigitalDistribution.Models.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace DigitalDistribution.Repositories
@@ -21,6 +22,14 @@ namespace DigitalDistribution.Repositories
         public async Task Commit()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public IQueryable<LibraryProductEntity> Get(Expression<Func<LibraryProductEntity, bool>> predicate = null)
+        {
+            if (predicate != null)
+                return Table.Where(predicate);
+
+            return Table;
         }
         public async Task<bool> Create(List<LibraryProductEntity> library)
         {

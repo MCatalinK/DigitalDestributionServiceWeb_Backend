@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using DigitalDistribution.Models.Exceptions;
 using DigitalDistribution.Models.Constants;
+using AutoMapper;
+using DigitalDistribution.Models.Database.Entities;
+using System.Collections.Generic;
+using DigitalDistribution.Models.Responses.Library;
 
 namespace DigitalDistribution.Controllers
 {
@@ -15,10 +19,16 @@ namespace DigitalDistribution.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly LibraryService _libraryService;
+        private readonly IMapper _mapper;
 
-        public UserController(UserService userService)
+        public UserController(UserService userService,
+            LibraryService libraryService,
+            IMapper mapper)
         {
             _userService = userService;
+            _libraryService = libraryService;
+            _mapper = mapper;
         }
         [Authorize]
         [HttpGet]
@@ -40,15 +50,15 @@ namespace DigitalDistribution.Controllers
         [HttpGet("library")]
         public async Task<ObjectResult> GetItemsFromLibrary()
         {
-            var user = await _userService.Get(p => p.Id == User.GetUserId())
-                .Include(p => p.LibraryItems)
-                .ThenInclude(p=>p.Product)
-                .FirstOrDefaultAsync();
+            var library = await _libraryService.Get(p => p.UserId == User.GetUserId())
+                .Include(p=>p.Product)
+                .ToListAsync();
+           
 
-            if (user?.LibraryItems is null)
+            if (library is null)
                 throw new NotFoundException(StringConstants.LibraryNotFound);
 
-            return Ok(user.LibraryItems);
+            return Ok(_mapper.Map<List<LibraryResponse>>(library));
         }
 
         [HttpPost("register")]

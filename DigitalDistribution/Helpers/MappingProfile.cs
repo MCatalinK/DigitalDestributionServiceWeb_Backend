@@ -13,8 +13,9 @@ using DigitalDistribution.Models.Database.Responses.Invoice;
 using DigitalDistribution.Models.Database.Responses.Product;
 using DigitalDistribution.Models.Database.Responses.Profile;
 using DigitalDistribution.Models.Database.Responses.Review;
+using DigitalDistribution.Models.Responses.DevTeam;
+using DigitalDistribution.Models.Responses.Library;
 using DigitalDistribution.Models.Responses.Update;
-
 
 #endregion
 namespace DigitalDistribution.Helpers
@@ -31,12 +32,14 @@ namespace DigitalDistribution.Helpers
 
             CreateMap<UpdateDevTeamRequest, DevelopmentTeamEntity>()
                 .ForAllMembers(p => p.Condition((q, s, m) => m != null));
+            CreateMap<DevelopmentTeamEntity, DevTeamDetailsResponse>();
 
             CreateMap<UpdateInvoiceRequest, InvoiceEntity>()
                 .ForAllMembers(p => p.Condition((q, s, m) => m != null));
 
             CreateMap<UpdateProductRequest, ProductEntity>()
                 .ForAllMembers(p => p.Condition((q, s, m) => m != null));
+
             CreateMap<ProductEntity, ProductResponse>();
 
             CreateMap<InvoiceEntity, InvoiceResponse>();
@@ -52,7 +55,8 @@ namespace DigitalDistribution.Helpers
             CreateMap<ReviewEntity, ReviewResponseProduct>();
             CreateMap<ReviewEntity, ReviewResponseProfile>();
 
-            
+            CreateMap<LibraryProductEntity, LibraryResponse>();
+             
         }
     }
 }
