@@ -12,6 +12,7 @@
         public static string ReviewExists = "The user made already a review for this product";
         public static string ProfileExists = "The user has already a profile";
         public static string UpdateExists = "The update already exists";
+        public static string ProductExists = "This product already exists";
 
         //Not found exceptions
         public static string BillingAddressNotFound = " Billing address wasn't found";

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -19,5 +20,6 @@ namespace DigitalDistribution.Models.Database.Entities
         public List<ReviewEntity> Reviews { get; set; }
         public List<LibraryProductEntity> LibraryItems { get; set; }
         public List<CheckoutItemEntity> InvoiceItems { get; set; }
+
     }
 }

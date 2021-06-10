@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DigitalDistribution.Models.Database.Entities
 {
@@ -9,6 +10,7 @@ namespace DigitalDistribution.Models.Database.Entities
         public string Country { get; set; }
         public string City { get; set; }
         public string Street { get; set; }
+        public List<InvoiceEntity> Bills { get; set; }
         public int UserId { get; set; }
         [ForeignKey("UserId")]public UserEntity User { get; set; }
     }

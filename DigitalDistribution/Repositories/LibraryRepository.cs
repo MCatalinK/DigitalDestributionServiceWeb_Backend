@@ -1,4 +1,5 @@
-﻿using DigitalDistribution.Models.Database;
+﻿using DigitalDistribution.Helpers;
+using DigitalDistribution.Models.Database;
 using DigitalDistribution.Models.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,27 +11,23 @@ namespace DigitalDistribution.Repositories
     public class LibraryRepository
     {
         private readonly DigitalDistributionDbContext _dbContext;
+        private readonly DbSet<LibraryProductEntity> Table;
 
         public LibraryRepository(DigitalDistributionDbContext dbContext)
         {
             _dbContext = dbContext;
+            Table = _dbContext.Set<LibraryProductEntity>();
         }
-
-        public async Task<bool> Create(UserEntity user ,InvoiceEntity invoice)
+        public async Task Commit()
         {
-            foreach(var item in invoice.CheckoutItems)
-            {
-                var libraryItem=new LibraryProductEntity
-                {
-                    DateAdded = DateTime.Now,
-                    Licence = item.Licence,
-                    UserId = user.Id,
-                    ProductId = item.ProductId
-                };
-                user.LibraryItems.Add(libraryItem);
-                await _dbContext.LibraryItems.AddAsync(libraryItem); 
-            }
             await _dbContext.SaveChangesAsync();
+        }
+        public async Task<bool> Create(List<LibraryProductEntity> library)
+        {
+
+            foreach (var item in library)
+                Table.Add(item);
+            await Commit();
             return true;
         }
     }

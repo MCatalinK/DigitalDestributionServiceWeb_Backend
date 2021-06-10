@@ -36,11 +36,18 @@ namespace DigitalDistribution.Helpers
             int count = 0;
             while (count < 4)
             {
-                licence.Append(RandomString(4) + "-");
+                licence.Append(RandomString(4).ToUpper() + "-");
                 count++;
             }
             licence.Remove(licence.Length - 1, 1);
             return licence.ToString();
         }
+        public static string CreateDownloadLink(this string obj)
+        {
+            var link = new StringBuilder();
+            link.Append("https://digitalds.ro/"+ obj.Substring(0,3)+RandomString(7));
+            return link.ToString();
+        }
+
     }
 }

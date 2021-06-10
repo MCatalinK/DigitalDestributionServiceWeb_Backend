@@ -13,6 +13,7 @@ using DigitalDistribution.Models.Database.Responses.Invoice;
 using DigitalDistribution.Models.Database.Responses.Product;
 using DigitalDistribution.Models.Database.Responses.Profile;
 using DigitalDistribution.Models.Database.Responses.Review;
+using DigitalDistribution.Models.Responses.Update;
 
 
 #endregion
@@ -45,10 +46,12 @@ namespace DigitalDistribution.Helpers
 
             CreateMap<UpdateRequest, UpdateEntity >()
                 .ForAllMembers(p => p.Condition((q, s, m) => m != null));
+            CreateMap<UpdateEntity, UpdateResponse>();
 
             CreateMap<ReviewEntity, ReviewResponse>();
             CreateMap<ReviewEntity, ReviewResponseProduct>();
             CreateMap<ReviewEntity, ReviewResponseProfile>();
+
             
         }
     }

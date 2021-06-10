@@ -39,9 +39,6 @@ namespace DigitalDistribution.Services
 
         public async Task<T> Create(T entity, bool commit = true)
         {
-            if (CurrentUser != null && CurrentUser.GetUserId() != 0)
-                entity.CreatedBy = CurrentUser.GetUserId();
-
             return await BaseRepository.Create(entity, commit);
         }
 

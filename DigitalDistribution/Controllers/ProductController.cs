@@ -6,6 +6,7 @@ using DigitalDistribution.Models.Database.Requests.Product;
 using DigitalDistribution.Models.Database.Requests.Update;
 using DigitalDistribution.Models.Database.Responses.Product;
 using DigitalDistribution.Models.Exceptions;
+using DigitalDistribution.Models.Responses.Update;
 using DigitalDistribution.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,7 +79,7 @@ namespace DigitalDistribution.Controllers
         [HttpGet("rating/{minimalLimit}")]
         public async Task<ObjectResult> GetProductByRating([FromRoute] int minimalLimit)
         {
-            if(minimalLimit<0 || minimalLimit>10)
+            if (minimalLimit < 0 || minimalLimit > 10)
                 throw new BadRequestException(StringConstants.BadReviewRatingEx);
 
             var products = await _productService.GetProductByRating(minimalLimit);
@@ -88,12 +89,49 @@ namespace DigitalDistribution.Controllers
             return Ok(_mapper.Map<List<ProductResponse>>(products));
         }
 
+        [HttpGet("updates/{productId}")]
+        public async Task<ObjectResult> GetAllUpdatesForProduct([FromRoute] int productId)
+        {
+            var product = await _productService.Get(p => p.Id == productId)
+                 .Include(p => p.Updates)
+                 .FirstOrDefaultAsync();
+
+            if (product is null)
+                throw new NotFoundException(StringConstants.NoProductFound);
+            if (product?.Updates is null)
+                throw new NotFoundException(StringConstants.UpdateNotFound);
+
+            return Ok(_mapper.Map<List<UpdateResponse>>(product.Updates));
+        }
+
+
+        [Authorize(Roles = "Developer")]
+        [HttpGet("developer")]
+        public async Task<ObjectResult> GetAllItemsForDevTeam()
+        {
+            var devUser = await _userService.Get(p => p.Id == User.GetUserId())
+                .Include(p => p.DevTeam)
+                .ThenInclude(p => p.Products)
+                .ThenInclude(p => p.Updates)
+                .FirstOrDefaultAsync();
+
+            if (devUser?.DevTeam.Products is null)
+                throw new NotFoundException(StringConstants.NoProductFound);
+
+            return Ok(devUser.DevTeam.Products);
+        }
+
+
         [Authorize(Roles ="Admin")]
         [HttpPost]
         public async Task<ObjectResult> NewProduct([FromBody] ProductEntity product)
         {
-            return Ok(await _productService.Create(product));
+            var prod = await _productService.Get(p => p.Name == product.Name).FirstOrDefaultAsync();
+            if (prod is null)
+                return Ok(await _productService.Create(product));
+            throw new ItemExistsException(StringConstants.ProductExists);
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{productId}")]
@@ -116,23 +154,7 @@ namespace DigitalDistribution.Controllers
 
             return Ok(await _productService.Update(_mapper.Map(productReq, product)));
         }
-
-        [Authorize(Roles = "Developer")]
-        [HttpGet("developer")]
-        public async Task<ObjectResult> GetAllItemsForDevTeam()
-        {
-            var devUser = await _userService.Get(p => p.Id == User.GetUserId())
-                .Include(p => p.DevTeam)
-                .ThenInclude(p => p.Products)
-                .ThenInclude(p=>p.Updates)
-                .FirstOrDefaultAsync();
-
-            if (devUser?.DevTeam.Products is null)
-                throw new NotFoundException(StringConstants.NoProductFound);
-
-            return Ok(devUser.DevTeam.Products);
-        }
-
+        
         //Updates
 
         [Authorize(Roles = "Developer")]
@@ -145,11 +167,17 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p=>p.Updates)
                .FirstOrDefaultAsync();
 
-            if (devUser.DevTeam.Products.FirstOrDefault().Updates.Contains(update))
-                throw new ItemExistsException(StringConstants.UpdateExists);
-
             if (devUser?.DevTeam.Products.FirstOrDefault() is null)
                 throw new NotFoundException(StringConstants.NoProductFound);
+
+            var up = await _updateService.Get(p => p.Version == update.Version)
+                .Include(p => p.Product)
+                .Where(p=>p.ProductId==productId)
+                .FirstOrDefaultAsync();
+
+
+            if (up!=null)
+                throw new ItemExistsException(StringConstants.UpdateExists);       
 
             var product = await _productService.Get(p=>p.Id==productId)
                     .Include(p => p.Updates)
@@ -170,10 +198,12 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p => p.Updates)
                .FirstOrDefaultAsync();
 
-            if (devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault() is null)
+            if (devUser?.DevTeam?.Products.FirstOrDefault() is null)
+                throw new NotFoundException(StringConstants.NoProductFound);
+            if(devUser?.DevTeam?.Products.First().Updates is null)
                 throw new NotFoundException(StringConstants.UpdateNotFound);
 
-            return Ok(await _updateService.Delete(devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault()));
+            return Ok(await _updateService.DeleteUpdate(devUser?.DevTeam.Products.FirstOrDefault().Updates.OrderBy(p => p.Version).LastOrDefault()));
         }
 
         [Authorize(Roles = "Developer")]

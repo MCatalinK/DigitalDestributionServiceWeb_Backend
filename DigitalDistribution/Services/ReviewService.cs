@@ -34,9 +34,6 @@ namespace DigitalDistribution.Services
 
         public async Task<ReviewEntity> Create(ReviewEntity entity, bool commit = true)
         {
-            if (CurrentUser != null && CurrentUser.GetUserId() != 0)
-                entity.CreatedBy = CurrentUser.GetUserId();
-
             return await _reviewRepository.Create(entity, commit);
         }
 

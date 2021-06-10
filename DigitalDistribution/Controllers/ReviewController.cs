@@ -23,6 +23,7 @@ namespace DigitalDistribution.Controllers
         private readonly ReviewService _reviewService;
         private readonly UserService _userService;
         private readonly ProductService _productService;
+        private readonly ProfileService _profileService;
         private readonly IMapper _mapper;
 
         public ReviewController(ReviewService reviewService,
@@ -34,6 +35,7 @@ namespace DigitalDistribution.Controllers
             _reviewService = reviewService;
             _productService = productService;
             _userService = userService;
+            _profileService = profileService;
             _mapper = mapper;
         }
 
@@ -46,6 +48,9 @@ namespace DigitalDistribution.Controllers
                 .ThenInclude(p => p.Product)
                 .FirstOrDefaultAsync();
 
+            if (user?.Profile is null)
+                throw new NotFoundException(StringConstants.ProfileNotFound);
+
             if (user?.Profile.Reviews is null)
                 throw new NotFoundException(StringConstants.NoReviewFound);
 
@@ -55,28 +60,31 @@ namespace DigitalDistribution.Controllers
         [HttpGet("{profileId}")]
         public async Task<ObjectResult> GetAllReviewsWrittenByProfile([FromRoute] int profileId)
         {
-            var user = await _userService.Get()
-                .Include(p => p.Profile)
-                .ThenInclude(p => p.Reviews.Where(u => u.ProfileId == profileId))
-                .ThenInclude(p => p.Product)
+            var reviews = await _reviewService.Get(p => p.ProfileId == profileId)
+                .Include(p=>p.Profile)
+                .ToListAsync();
+
+            var profile = await _profileService.Get(p => p.Id == profileId)
                 .FirstOrDefaultAsync();
 
-            if (user?.Profile.Reviews is null)
+            if (profile is null)
+                throw new NotFoundException(StringConstants.ProfileNotFound);
+
+            if(reviews is null)
                 throw new NotFoundException(StringConstants.NoReviewFound);
 
-            return Ok(_mapper.Map<List<ReviewResponseProduct>>(user.Profile.Reviews));
+            return Ok(_mapper.Map<List<ReviewResponseProduct>>(reviews));   
         }
 
         [HttpGet("get/{productId}")]
         public async Task<ObjectResult> GetAllReviewsWrittenForProduct([FromRoute] int productId)
         {
-            var product = await _productService.Get()
-                .Include(p => p.Reviews.Where(u => u.ProductId == productId))
-                .ThenInclude(p => p.Profile)
+            var product = await _productService.Get(p=>p.Id==productId)
+                .Include(p => p.Reviews)
                 .FirstOrDefaultAsync();
 
             if (product?.Reviews is null)
-                throw new NotFoundException(StringConstants.NoReviewFound); ;
+                throw new NotFoundException(StringConstants.NoReviewFound);
 
             return Ok(_mapper.Map<List<ReviewResponseProfile>>(product.Reviews));
         }

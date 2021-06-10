@@ -44,11 +44,10 @@ namespace DigitalDistribution.Controllers
         [HttpPost]
         public async Task<ObjectResult> AddDevelopmentTeam([FromBody] DevelopmentTeamEntity team)
         {
-            var devTeam = await _developmentTeamService.Get().ToListAsync();
-            if (devTeam.Contains(team))
-                throw new ItemExistsException(StringConstants.DevTeamExists);
-
-            return Ok(await _developmentTeamService.Create(team));
+            var devTeam = await _developmentTeamService.Get(p=>p.Name==team.Name).FirstOrDefaultAsync();
+            if (devTeam is null)
+                return Ok(await _developmentTeamService.Create(team));
+            throw new ItemExistsException(StringConstants.DevTeamExists); 
         }
 
         [Authorize(Roles = "Admin")]

@@ -107,7 +107,6 @@ namespace DigitalDistribution
             services.AddScoped<BillingAddressService>();
             services.AddScoped<ReviewService>();
             services.AddScoped<UserService>();
-            services.AddScoped<CheckoutItemService>();
             services.AddScoped<InvoiceService>();
             services.AddScoped<LibraryService>();
             services.AddScoped<ProductService>();

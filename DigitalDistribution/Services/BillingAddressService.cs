@@ -32,9 +32,6 @@ namespace DigitalDistribution.Services
 
         public async Task<BillingAddressEntity> Create(BillingAddressEntity entity, bool commit = true)
         {
-            if (CurrentUser != null && CurrentUser.GetUserId() != 0)
-                entity.CreatedBy = CurrentUser.GetUserId();
-
             return await _addressRepository.Create(entity, commit);
         }
 

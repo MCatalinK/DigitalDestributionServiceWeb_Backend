@@ -11,7 +11,6 @@ namespace DigitalDistribution.Models.Database.Entities
         public int Id { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public DateTime DateModified { get; set; } = DateTime.Now;
-        public int CreatedBy { get; set; }
         public bool IsDeleted { get; set; } = false;
     }
 }

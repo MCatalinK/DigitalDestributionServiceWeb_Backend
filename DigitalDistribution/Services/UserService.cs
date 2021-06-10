@@ -42,7 +42,7 @@ namespace DigitalDistribution.Services
                 .Include(p=>p.Profile)
                 .ThenInclude(p=>p.Reviews)
                 .Include(p=>p.Address)
-                .Include(p=>p.Bills)
+                .ThenInclude(p=>p.Bills)
                 .Include(p=>p.LibraryItems)
                 .FirstOrDefaultAsync();
         }

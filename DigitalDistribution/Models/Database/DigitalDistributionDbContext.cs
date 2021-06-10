@@ -52,11 +52,12 @@ namespace DigitalDistribution.Models.Database
 
             #region 1:N Relationships
 
-            modelBuilder.Entity<UserEntity>()
+            modelBuilder.Entity<BillingAddressEntity>()
                 .HasMany(e => e.Bills)
-                .WithOne(e => e.User)
-                .HasForeignKey(fk => fk.UserId)
-                .IsRequired(false);
+                .WithOne(e => e.Address)
+                .HasForeignKey(fk => fk.AddressId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ProductEntity>()
                 .HasMany(e => e.Updates)

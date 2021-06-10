@@ -11,14 +11,5 @@ namespace DigitalDistribution.Models.Database.Entities
         public List<ProductEntity> Products { get; set; }
         public List<UserEntity> Users { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            return obj is DevelopmentTeamEntity entity &&
-                   Name == entity.Name;
-        }
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name);
-        }
     }
 }
