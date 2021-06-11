@@ -216,7 +216,7 @@ namespace DigitalDistribution.Controllers
                .ThenInclude(p=>p.Updates.Where(u=>u.Id==updateId))
                .FirstOrDefaultAsync();
 
-            if (devUser?.DevTeam.Products.FirstOrDefault().Updates.FirstOrDefault() is null)
+            if (devUser?.DevTeam.Products.FirstOrDefault()?.Updates.FirstOrDefault() is null)
                 throw new NotFoundException(StringConstants.UpdateNotFound);
 
             if (devUser?.DevTeam.Products.FirstOrDefault().Version > update.Version)
